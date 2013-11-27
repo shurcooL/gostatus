@@ -17,7 +17,19 @@ Usage
 -----
 
 ```bash
+# TODO: Implement this
 $ outdated [packages]
 
 $ [packages] | outdated
+```
+
+Examples
+--------
+
+```bash
+# Run outdated on all your packages
+$ go list all | outdated
+
+# Run outdated on all dependencies (recursive) of package in current working directory
+$ go list -f '{{join .Deps "\n"}}' . | outdated
 ```
