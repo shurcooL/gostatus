@@ -3,6 +3,8 @@ outdated
 
 A command line tool that lists Go packages with newer versions.
 
+It currently prints remote version information only for git repositories.
+
 Installation
 ------------
 
