@@ -30,6 +30,9 @@ Examples
 # Run outdated on all your packages
 $ go list all | outdated
 
-# Run outdated on all dependencies (recursive) of package in current working directory
+# Run on all dependencies (recursive) of package in current working directory
 $ go list -f '{{join .Deps "\n"}}' . | outdated
+
+# Run on all dependencies (recursive) of specified package
+$ go list -f '{{join .Deps "\n"}}' github.com/some/import/path | outdated
 ```
