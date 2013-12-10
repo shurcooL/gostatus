@@ -5,6 +5,7 @@ A command line tool that lists Go packages with newer versions.
 
 Legend:
 - `@` - Git repo
+- `b` - Non-master branch checked out
 - `*` - Uncommited changes in working dir
 - `+` - Latest remote revision doesn't match local revision
 - `/` - Command (package main)
