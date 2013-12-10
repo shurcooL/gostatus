@@ -39,13 +39,13 @@ Examples
 $ go list all | outdated
 
 # Run outdated on specified package
-$ go list github.com/import/path | outdated
+$ go list some/import/path | outdated
 
 # Run outdated on package in current working dir
 $ go list . | outdated
 
 # Run on all dependencies (recursive) of specified package
-$ go list -f '{{join .Deps "\n"}}' github.com/import/path | outdated
+$ go list -f '{{join .Deps "\n"}}' some/import/path | outdated
 
 # Run on all dependencies (recursive) of package in current working dir
 $ go list -f '{{join .Deps "\n"}}' . | outdated
