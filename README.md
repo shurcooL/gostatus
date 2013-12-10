@@ -3,26 +3,31 @@ outdated
 
 A command line tool that lists Go packages with newer versions.
 
-It currently prints remote version information only for git repositories.
+Legend:
+- `@` - Git repo
+- `*` - Uncommited changes in working dir
+- `+` - Latest remote revision doesn't match local revision
+- `/` - Command (package main)
+
+Caveat: It currently prints remote version information only for git repositories. Mercurial support to be done...
 
 Installation
 ------------
 
 ```bash
-$ mkdir /tmp/temp_dir_for_download
-$ GOPATH=/tmp/temp_dir_for_download go get github.com/shurcooL/outdated
-# Copy /tmp/temp_dir_for_download/bin/outdated to somewhere in your $PATH
-# Feel free to delete /tmp/temp_dir_for_download
+$ mkdir /tmp/new-temp-dl-dir && GOPATH=/tmp/new-temp-dl-dir go get github.com/shurcooL/outdated
 ```
+
+Copy `/tmp/new-temp-dl-dir/bin/outdated` to somewhere in your `$PATH`. Feel free to delete `/tmp/new-temp-dl-dir`.
 
 Usage
 -----
 
 ```bash
-# TODO: Implement this
-$ outdated [packages]
-
 $ [packages] | outdated
+
+# TODO: Implement this
+#$ outdated [packages]
 ```
 
 Examples
