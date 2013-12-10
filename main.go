@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"runtime"
 	"strings"
@@ -27,6 +28,6 @@ func main() {
 	outChan := GoReduceLinesFromReader(os.Stdin, 8, reduceFunc)
 
 	for out := range outChan {
-		println(out.(string))
+		fmt.Println(out.(string))
 	}
 }
