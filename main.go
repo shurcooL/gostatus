@@ -12,21 +12,21 @@ import (
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	reduceFunc := func(in string) (string, bool) {
+	reduceFunc := func(in string) interface{} {
 		if x := SomethingFromImportPath(in); x != nil {
 			Standard := x.Bpkg.Goroot && x.Bpkg.ImportPath != "" && !strings.Contains(x.Bpkg.ImportPath, ".")
 
 			if !Standard {
 				x.Update()
-				return x.String(), true
+				return x.String()
 			}
 		}
-		return "", false
+		return nil
 	}
 
 	outChan := GoReduceLinesFromReader(os.Stdin, 8, reduceFunc)
 
 	for out := range outChan {
-		println(out)
+		println(out.(string))
 	}
 }
