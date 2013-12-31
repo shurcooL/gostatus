@@ -1,7 +1,7 @@
 gostatus
 ========
 
-A command line tool that shows the status of Go packages.
+A command line tool that shows the status of (many) Go packages.
 
 Legend:
 
