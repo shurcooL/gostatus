@@ -1,7 +1,7 @@
-outdated
+gostatus
 ========
 
-A command line tool that lists Go packages with newer versions.
+A command line tool that shows the status of Go packages.
 
 Legend:
 - `@` - Git repo
@@ -16,37 +16,37 @@ Installation
 ------------
 
 ```bash
-$ mkdir /tmp/new-dl-dir && GOPATH=/tmp/new-dl-dir go get github.com/shurcooL/outdated
+$ mkdir /tmp/new-dl-dir && GOPATH=/tmp/new-dl-dir go get github.com/shurcooL/gostatus
 ```
 
-Copy `/tmp/new-dl-dir/bin/outdated` to somewhere in your `$PATH`. Feel free to delete `/tmp/new-dl-dir`.
+Copy `/tmp/new-dl-dir/bin/gostatus` to somewhere in your `$PATH`. Feel free to delete `/tmp/new-dl-dir`.
 
 Usage
 -----
 
 ```bash
-$ [newline separated packages] | outdated
+$ [newline separated packages] | gostatus
 
-# TODO: Implement this
-#$ outdated [packages]
+# TODO: Consider implementing this
+#$ gostatus [packages]
 ```
 
 Examples
 --------
 
 ```bash
-# Run outdated on all your packages
-$ go list all | outdated
+# Show status of all your packages
+$ go list all | gostatus
 
-# Run outdated on specified package
-$ go list some/import/path | outdated
+# Show status of package in current working dir
+$ go list . | gostatus
 
-# Run outdated on package in current working dir
-$ go list . | outdated
+# Show status of specified package
+$ echo some/import/path | gostatus
 
-# Run on all dependencies (recursive) of specified package
-$ go list -f '{{join .Deps "\n"}}' some/import/path | outdated
+# Show status of all dependencies (recursive) of package in current working dir
+$ go list -f '{{join .Deps "\n"}}' . | gostatus
 
-# Run on all dependencies (recursive) of package in current working dir
-$ go list -f '{{join .Deps "\n"}}' . | outdated
+# Show status of all dependencies (recursive) of specified package
+$ go list -f '{{join .Deps "\n"}}' some/import/path | gostatus
 ```
