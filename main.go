@@ -1,3 +1,4 @@
+// A command line tool that shows the status of (many) Go packages.
 package main
 
 import (
