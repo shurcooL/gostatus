@@ -45,6 +45,11 @@ func main() {
 	outChan := GoReduceLinesFromReader(os.Stdin, 8, reduceFunc)
 
 	for out := range outChan {
+		// TODO: Instead of skipping git repos that were done, cache their state and reuse it
+		if strings.HasPrefix(out.(string), "@---- ") {
+			continue
+		}
+
 		fmt.Println(out.(string))
 	}
 }
