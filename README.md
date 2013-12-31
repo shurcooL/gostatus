@@ -91,7 +91,7 @@ $ go list all | gostatus
 
 There are a few observations that can be made from that sample output.
 
-- My `github.com/dchest/uniuri` and `github.com/syndtr/goleveldb/leveldb` packages are out of date, I should update them via `go get -u`.
-- My `github.com/shurcooL/go-goon` package has a branch other than "main" checked out, I should be aware of that.
-- My `github.com/shurcooL/Conception-go` package has a dirty working tree. I should remember to commit or discard the changes.
+- My `uniuri` and `leveldb` packages are out of date, I should update them via `go get -u`.
+- My `go-goon` package has a branch other than "main" checked out, I should be aware of that.
+- My `Conception-go` package has uncommited changes. I should remember to commit or discard the changes.
 - All other packages are up to date and looking good.
