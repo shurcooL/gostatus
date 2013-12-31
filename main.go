@@ -2,6 +2,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"runtime"
@@ -12,8 +13,27 @@ import (
 	. "gist.github.com/7651991.git"
 )
 
+func usage() {
+	const legend = `
+Legend:
+  @ - Git repo
+  b - Non-master branch checked out
+  * - Uncommited changes in working dir
+  + - Update available (latest remote revision doesn't match local revision)
+  / - Command (package main)
+`
+
+	fmt.Fprint(os.Stderr, "usage: [newline separated packages] | gostatus\n")
+	flag.PrintDefaults()
+	fmt.Fprint(os.Stderr, legend)
+	os.Exit(2)
+}
+
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	flag.Usage = usage
+	flag.Parse()
 
 	var lock sync.Mutex
 	checkedGitRepos := map[string]bool{}
