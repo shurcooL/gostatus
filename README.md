@@ -3,36 +3,34 @@ gostatus
 
 A command line tool that shows the status of (many) Go packages.
 
-Legend:
-
-- `@` - Git repo
-- `b` - Non-master branch checked out
-- `*` - Uncommited changes in working dir
-- `+` - Update available (latest remote revision doesn't match local revision)
-- `/` - Command (package main)
-
-Caveats:
-
-- It currently prints remote version information only for git repositories. Mercurial support to be done...
-- It currently lists one Go package per git repo (even if there are many), in order to avoid polling same git repo more than once. A proper solution will be to cache and reuse the results, to be done.
-
 Installation
 ------------
 
 ```bash
-$ mkdir /tmp/new-dl-dir && GOPATH=/tmp/new-dl-dir go get github.com/shurcooL/gostatus
+$ mkdir /tmp/gostatus/ && GOPATH=/tmp/gostatus/ go get github.com/shurcooL/gostatus
 ```
 
-Copy `/tmp/new-dl-dir/bin/gostatus` to somewhere in your `$PATH`. Feel free to delete `/tmp/new-dl-dir`.
+Copy `/tmp/gostatus/bin/gostatus` to somewhere in your `$PATH`. Feel free to remove `/tmp/gostatus/`.
 
 Usage
 -----
 
 ```bash
-$ [newline separated packages] | gostatus
+Usage: [newline separated packages] | gostatus
 
-# TODO: Consider implementing this
-#$ gostatus [packages]
+Examples:
+  # Show status of all your packages
+  go list all | gostatus
+
+  # Show status of all dependencies (recursive) of package in cur working dir
+  go list -f '{{join .Deps "\n"}}' . | gostatus
+
+Legend:
+  @ - Git repo
+  b - Non-master branch checked out
+  * - Uncommited changes in working dir
+  + - Update available (latest remote revision doesn't match local revision)
+  / - Command (package main)
 ```
 
 Examples
@@ -95,3 +93,9 @@ There are a few observations that can be made from that sample output.
 - `go-goon` package has a branch other than ***master*** checked out, I should be aware of that.
 - `Conception-go` package has ***uncommited changes***. I should remember to commit or discard the changes.
 - All other packages are ***up to date*** and looking good.
+
+Caveats
+-------
+
+- It currently prints remote version information only for git repositories. Mercurial support to be done...
+- It currently lists one Go package per git repo (even if there are many), in order to avoid polling same git repo more than once. A proper solution will be to cache and reuse the results, to be done.
