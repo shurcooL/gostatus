@@ -64,7 +64,7 @@ func main() {
 					} else {
 						lock.Unlock()
 						// TODO: Instead of skipping git repos that were done, cache their state and reuse it
-						return "@---- " + x.Bpkg.ImportPath
+						return nil
 					}
 				}
 
@@ -80,11 +80,6 @@ func main() {
 
 	// Output results
 	for out := range outChan {
-		// TODO: Instead of skipping git repos that were done, cache their state and reuse it
-		if strings.HasPrefix(out.(string), "@---- ") {
-			continue
-		}
-
 		fmt.Println(out.(string))
 	}
 }
