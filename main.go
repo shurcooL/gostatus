@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/shurcooL/gostatus/status"
+
 	// TODO: Make a note about these imports...
 	//       Until then, see their godoc pages:
 	. "gist.github.com/7480523.git" // http://godoc.org/gist.github.com/7480523.git
@@ -44,6 +46,8 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
+	var presenter SomethingStringer = status.Presenter
+
 	// A map of git repos that have been checked, to avoid doing same git repo more than once
 	var lock sync.Mutex
 	checkedGitRepos := map[string]bool{}
@@ -69,7 +73,7 @@ func main() {
 				}
 
 				x.Update()
-				return x.String()
+				return presenter(x)
 			}
 		}
 		return nil
