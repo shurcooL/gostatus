@@ -27,7 +27,7 @@ Examples:
   go list -f '{{join .Deps "\n"}}' . | gostatus
 
 Legend:
-  @ - Git repo
+  @ - Vcs repo
   b - Non-master branch checked out
   * - Uncommited changes in working dir
   + - Update available (latest remote revision doesn't match local revision)
@@ -46,33 +46,34 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	var presenter SomethingStringer = status.Presenter
+	var presenter GoPackageStringer = status.Presenter
 
-	// A map of git repos that have been checked, to avoid doing same git repo more than once
+	// A map of repos that have been checked, to avoid doing same repo more than once
 	var lock sync.Mutex
-	checkedGitRepos := map[string]bool{}
+	checkedRepos := map[string]bool{}
 
 	// Input: Go package Import Path
 	// Output: If a valid Go package and not part of standard library, output a status string, else nil
 	reduceFunc := func(in string) interface{} {
-		if x := SomethingFromImportPath(in); x != nil {
+		if x := GoPackageFromImportPath(in); x != nil {
 			Standard := x.Bpkg.Goroot && x.Bpkg.ImportPath != "" && !strings.Contains(x.Bpkg.ImportPath, ".")
 
 			if !Standard {
-				// HACK: Check that the same git repo hasn't already been done
-				if isGitRepo, rootPath := GetGitRepoRoot(x.Path); isGitRepo {
+				// HACK: Check that the same repo hasn't already been done
+				if isRepo := x.CheckIfUnderVcs(); isRepo {
+					rootPath := x.Vcs.RootPath()
 					lock.Lock()
-					if !checkedGitRepos[rootPath] {
-						checkedGitRepos[rootPath] = true
+					if !checkedRepos[rootPath] {
+						checkedRepos[rootPath] = true
 						lock.Unlock()
 					} else {
 						lock.Unlock()
-						// TODO: Instead of skipping git repos that were done, cache their state and reuse it
+						// TODO: Instead of skipping repos that were done, cache their state and reuse it
 						return nil
 					}
 				}
 
-				x.Update()
+				x.UpdateVcsFields()
 				return presenter(x)
 			}
 		}

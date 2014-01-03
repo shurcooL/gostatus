@@ -26,7 +26,7 @@ Examples:
   go list -f '{{join .Deps "\n"}}' . | gostatus
 
 Legend:
-  @ - Git repo
+  @ - Vcs repo
   b - Non-master branch checked out
   * - Uncommited changes in working dir
   + - Update available (latest remote revision doesn't match local revision)
@@ -98,4 +98,4 @@ Caveats
 -------
 
 - It currently prints remote version information only for git repositories. Mercurial support to be done...
-- It currently lists one Go package per git repo (even if there are many), in order to avoid polling same git repo more than once. A proper solution will be to cache and reuse the results, to be done.
+- It currently lists one Go package per repo (even if there are many), in order to avoid polling same repo more than once. A proper solution will be to cache and reuse the results, to be done.

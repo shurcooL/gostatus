@@ -6,16 +6,16 @@ import (
 	. "gist.github.com/7480523.git" // http://godoc.org/gist.github.com/7480523.git
 )
 
-// Presenter is a simple porcelain presenter of Something to humans.
+// Presenter is a simple porcelain presenter of GoPackage to humans.
 // It may change, so don't parse it; another plumbing presenter should be used for that.
 //
 // It currently is, and must remain read-only and safe for concurrent execution.
-var Presenter SomethingStringer = func(w *Something) string {
+var Presenter GoPackageStringer = func(w *GoPackage) string {
 	out := ""
 
-	if w.IsGitRepo {
+	if w.Vcs != nil {
 		out += "@"
-		if w.LocalBranch != "master" {
+		if w.LocalBranch != w.Vcs.GetDefaultBranch() {
 			out += "b"
 		} else {
 			out += " "
@@ -25,7 +25,7 @@ var Presenter SomethingStringer = func(w *Something) string {
 		} else {
 			out += " "
 		}
-		if w.Remote != w.Local {
+		if w.Local != w.Remote {
 			out += "+"
 		} else {
 			out += " "
