@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"runtime"
-	"strings"
 	"sync"
 
 	"github.com/shurcooL/gostatus/status"
@@ -55,13 +54,11 @@ func main() {
 	// Input: Go package Import Path
 	// Output: If a valid Go package and not part of standard library, output a status string, else nil
 	reduceFunc := func(in string) interface{} {
-		if x := GoPackageFromImportPath(in); x != nil {
-			Standard := x.Bpkg.Goroot && x.Bpkg.ImportPath != "" && !strings.Contains(x.Bpkg.ImportPath, ".")
-
-			if !Standard {
+		if goPackage := GoPackageFromImportPath(in); goPackage != nil {
+			if !goPackage.Standard {
 				// HACK: Check that the same repo hasn't already been done
-				if isRepo := x.CheckIfUnderVcs(); isRepo {
-					rootPath := x.Vcs.RootPath()
+				if goPackage.Vcs != nil {
+					rootPath := goPackage.Vcs.RootPath()
 					lock.Lock()
 					if !checkedRepos[rootPath] {
 						checkedRepos[rootPath] = true
@@ -73,8 +70,8 @@ func main() {
 					}
 				}
 
-				x.UpdateVcsFields()
-				return presenter(x)
+				goPackage.UpdateVcsFields()
+				return presenter(goPackage)
 			}
 		}
 		return nil
