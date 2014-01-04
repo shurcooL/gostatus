@@ -58,9 +58,9 @@ Sample Output
 
 ```bash
 $ go list all | gostatus
-      code.google.com/p/go-uuid/uuid
-      code.google.com/p/snappy-go/snappy
-      code.google.com/p/goprotobuf/proto
+@     code.google.com/p/go-uuid/uuid
+@     code.google.com/p/snappy-go/snappy
+@     code.google.com/p/goprotobuf/proto
 @     github.com/jmhodges/levigo
 @     github.com/bradfitz/gomemcache/memcache
 @  +  github.com/dchest/uniuri
