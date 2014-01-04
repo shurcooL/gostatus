@@ -97,5 +97,4 @@ There are a few observations that can be made from that sample output.
 Caveats
 -------
 
-- It currently prints remote version information only for git repositories. Mercurial support to be done...
 - It currently lists one Go package per repo (even if there are many), in order to avoid polling same repo more than once. A proper solution will be to cache and reuse the results, to be done.
