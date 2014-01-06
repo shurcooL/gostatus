@@ -4,12 +4,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/shurcooL/gostatus/status"
 	"os"
 	"runtime"
+	"strings"
 	"sync"
-
-	"github.com/shurcooL/gostatus/status"
-
 	// TODO: Make a note about these imports...
 	//       Until then, see their godoc pages:
 	. "gist.github.com/7480523.git" // http://godoc.org/gist.github.com/7480523.git
@@ -42,6 +41,7 @@ Legend:
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
+	var short = flag.Bool("short", false, "Only show modified or branch (short) packages.")
 	flag.Usage = usage
 	flag.Parse()
 
@@ -82,6 +82,14 @@ func main() {
 
 	// Output results
 	for out := range outChan {
-		fmt.Println(out.(string))
+		outLine := out.(string)
+		strArry := strings.Split(outLine, "")
+		if *short {
+			if strArry[1] == "b" || strArry[2] == "*" || strArry[3] == "+" {
+				fmt.Println(outLine)
+			}
+		} else {
+			fmt.Println(outLine)
+		}
 	}
 }
