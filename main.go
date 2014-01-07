@@ -16,6 +16,8 @@ import (
 	. "gist.github.com/7651991.git" // http://godoc.org/gist.github.com/7651991.git
 )
 
+var shortFlag = flag.Bool("short", false, "Only show modified or branch (short) packages.")
+
 func usage() {
 	const legend = `
 Examples:
@@ -33,7 +35,7 @@ Legend:
   / - Command (package main)
 `
 
-	fmt.Fprint(os.Stderr, "Usage: [newline separated packages] | gostatus\n")
+	fmt.Fprint(os.Stderr, "Usage: [newline separated packages] | gostatus [--short]\n")
 	flag.PrintDefaults()
 	fmt.Fprint(os.Stderr, legend)
 	os.Exit(2)
@@ -44,6 +46,17 @@ func main() {
 
 	flag.Usage = usage
 	flag.Parse()
+
+	shouldShow := func(_ *GoPackage) bool { return true }
+
+	if *shortFlag == true {
+		shouldShow = func(goPackage *GoPackage) bool {
+			return goPackage.Vcs != nil &&
+				(goPackage.LocalBranch != goPackage.Vcs.GetDefaultBranch() ||
+					goPackage.Status != "" ||
+					goPackage.Local != goPackage.Remote)
+		}
+	}
 
 	var presenter GoPackageStringer = status.Presenter
 
@@ -71,6 +84,9 @@ func main() {
 				}
 
 				goPackage.UpdateVcsFields()
+				if shouldShow(goPackage) == false {
+					return nil
+				}
 				return presenter(goPackage)
 			}
 		}

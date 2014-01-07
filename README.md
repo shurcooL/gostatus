@@ -16,7 +16,8 @@ Usage
 -----
 
 ```bash
-Usage: [newline separated packages] | gostatus
+Usage: [newline separated packages] | gostatus [--short]
+  -short=false: Only show modified or branch (short) packages.
 
 Examples:
   # Show status of all your packages
