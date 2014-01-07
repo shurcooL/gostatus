@@ -57,7 +57,7 @@ func main() {
 		if goPackage := GoPackageFromImportPath(in); goPackage != nil {
 			if !goPackage.Standard {
 				// HACK: Check that the same repo hasn't already been done
-				if goPackage.Vcs != nil {
+				if goPackage.UpdateVcs(); goPackage.Vcs != nil {
 					rootPath := goPackage.Vcs.RootPath()
 					lock.Lock()
 					if !checkedRepos[rootPath] {
