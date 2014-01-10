@@ -16,16 +16,19 @@ import (
 	. "gist.github.com/7651991.git" // http://godoc.org/gist.github.com/7651991.git
 )
 
-var shortFlag = flag.Bool("short", false, "Only show modified or branch (short) packages.")
+var allFlag = flag.Bool("all", false, "Show all Go packages, not just ones with notable status.")
+var plumbingFlag = flag.Bool("plumbing", false, "Give the output in an easy-to-parse format for scripts.")
 
 func usage() {
-	const legend = `
+	fmt.Fprint(os.Stderr, "Usage: [newline separated packages] | gostatus [--all] [--plumbing]\n")
+	flag.PrintDefaults()
+	fmt.Fprint(os.Stderr, `
 Examples:
-  # Show status of all your packages
-  go list all | gostatus
+  # Show status of packages with notable status
+  go list all | gostatus --all
 
   # Show status of all dependencies (recursive) of package in cur working dir
-  go list -f '{{join .Deps "\n"}}' . | gostatus
+  go list -f '{{join .Deps "\n"}}' . | gostatus --all
 
 Legend:
   @ - Vcs repo
@@ -33,11 +36,7 @@ Legend:
   * - Uncommited changes in working dir
   + - Update available (latest remote revision doesn't match local revision)
   / - Command (package main)
-`
-
-	fmt.Fprint(os.Stderr, "Usage: [newline separated packages] | gostatus [--short]\n")
-	flag.PrintDefaults()
-	fmt.Fprint(os.Stderr, legend)
+`)
 	os.Exit(2)
 }
 
@@ -47,18 +46,23 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	shouldShow := func(_ *GoPackage) bool { return true }
-
-	if *shortFlag == true {
-		shouldShow = func(goPackage *GoPackage) bool {
-			return goPackage.Vcs != nil &&
-				(goPackage.LocalBranch != goPackage.Vcs.GetDefaultBranch() ||
-					goPackage.Status != "" ||
-					goPackage.Local != goPackage.Remote)
-		}
+	shouldShow := func(goPackage *GoPackage) bool {
+		// Check for notable status
+		return goPackage.Vcs != nil &&
+			(goPackage.LocalBranch != goPackage.Vcs.GetDefaultBranch() ||
+				goPackage.Status != "" ||
+				goPackage.Local != goPackage.Remote)
 	}
 
-	var presenter GoPackageStringer = status.Presenter
+	if *allFlag == true {
+		shouldShow = func(_ *GoPackage) bool { return true }
+	}
+
+	var presenter GoPackageStringer = status.PorcelainPresenter
+
+	if *plumbingFlag == true {
+		presenter = status.PlumbingPresenter
+	}
 
 	// A map of repos that have been checked, to avoid doing same repo more than once
 	var lock sync.Mutex
