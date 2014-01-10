@@ -16,7 +16,7 @@
 		},
 		{
 			"ImportPath": "gist.github.com/5892738.git",
-			"Rev": "6a9cea30454d4426ace0823260950f3e7c96a0db"
+			"Rev": "9e49a36a381a73606aa38124f34f0926a4dc3490"
 		},
 		{
 			"ImportPath": "gist.github.com/7480523.git",
@@ -28,7 +28,7 @@
 		},
 		{
 			"ImportPath": "gist.github.com/7651991.git",
-			"Rev": "e94321c803f8637e105e899448f3b8134836ca3c"
+			"Rev": "1854b2890705248cb7380d6030447c09578e95cf"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/vcs",
