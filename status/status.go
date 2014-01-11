@@ -6,11 +6,17 @@ import (
 	. "gist.github.com/7480523.git" // http://godoc.org/gist.github.com/7480523.git
 )
 
-// Presenter is a simple porcelain presenter of GoPackage to humans.
-// It may change, so don't parse it; another plumbing presenter should be used for that.
+// PorcelainPresenter is a simple porcelain presenter of GoPackage to humans.
+// It is currently the same as the PlumbingPresenter, but this may evolve.
 //
 // It currently is, and must remain read-only and safe for concurrent execution.
-var Presenter GoPackageStringer = func(w *GoPackage) string {
+var PorcelainPresenter GoPackageStringer = PlumbingPresenter
+
+// PlumbingPresenter gives the output in an easy-to-parse format for scripts.
+// This format should remain stable across versions and regardless of user configuration.
+//
+// It currently is, and must remain read-only and safe for concurrent execution.
+var PlumbingPresenter GoPackageStringer = func(w *GoPackage) string {
 	out := ""
 
 	if w.Vcs != nil {

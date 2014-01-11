@@ -16,14 +16,16 @@ Usage
 -----
 
 ```bash
-Usage: [newline separated packages] | gostatus
+Usage: [newline separated packages] | gostatus [--all] [--plumbing]
+  -all=false: Show all Go packages, not just ones with notable status.
+  -plumbing=false: Give the output in an easy-to-parse format for scripts.
 
 Examples:
-  # Show status of all your packages
-  go list all | gostatus
+  # Show status of packages with notable status
+  go list all | gostatus --all
 
   # Show status of all dependencies (recursive) of package in cur working dir
-  go list -f '{{join .Deps "\n"}}' . | gostatus
+  go list -f '{{join .Deps "\n"}}' . | gostatus --all
 
 Legend:
   @ - Vcs repo
@@ -57,7 +59,7 @@ Sample Output
 -------------
 
 ```bash
-$ go list all | gostatus
+$ go list all | gostatus --all
 @     code.google.com/p/go-uuid/uuid
 @     code.google.com/p/snappy-go/snappy
 @     code.google.com/p/goprotobuf/proto
