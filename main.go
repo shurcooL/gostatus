@@ -25,7 +25,7 @@ func usage() {
 	fmt.Fprint(os.Stderr, `
 Examples:
   # Show status of packages with notable status
-  go list all | gostatus --all
+  go list all | gostatus
 
   # Show status of all dependencies (recursive) of package in cur working dir
   go list -f '{{join .Deps "\n"}}' . | gostatus --all
