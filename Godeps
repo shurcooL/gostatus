@@ -20,7 +20,7 @@
 		},
 		{
 			"ImportPath": "gist.github.com/7480523.git",
-			"Rev": "ccfc295c7ecbd89ba7a533bd51890e953a3987f0"
+			"Rev": "69c3009521c0a895fcda83b16a14a8748edddcce"
 		},
 		{
 			"ImportPath": "gist.github.com/7519227.git",
@@ -31,8 +31,20 @@
 			"Rev": "1854b2890705248cb7380d6030447c09578e95cf"
 		},
 		{
+			"ImportPath": "gist.github.com/7802150.git",
+			"Rev": "bfb787f1fc6b8c3d192cebe3887bf041f1147053"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/go/exp/12",
+			"Rev": "0c7ff4088dae0001f615a5414dda6cdbd4b4d27a"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/go/exp/13",
+			"Rev": "0c7ff4088dae0001f615a5414dda6cdbd4b4d27a"
+		},
+		{
 			"ImportPath": "github.com/shurcooL/go/vcs",
-			"Rev": "b3c46dc7ebdfe9dc8a92f4796d2c594032b29910"
+			"Rev": "0c7ff4088dae0001f615a5414dda6cdbd4b4d27a"
 		}
 	]
 }

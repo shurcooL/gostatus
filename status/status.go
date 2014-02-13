@@ -19,19 +19,19 @@ var PorcelainPresenter GoPackageStringer = PlumbingPresenter
 var PlumbingPresenter GoPackageStringer = func(w *GoPackage) string {
 	out := ""
 
-	if w.Vcs != nil {
+	if w := w.Dir.Repo; w != nil {
 		out += "@"
-		if w.LocalBranch != w.Vcs.GetDefaultBranch() {
+		if w.VcsLocal.LocalBranch != w.Vcs.GetDefaultBranch() {
 			out += "b"
 		} else {
 			out += " "
 		}
-		if w.Status != "" {
+		if w.VcsLocal.Status != "" {
 			out += "*"
 		} else {
 			out += " "
 		}
-		if w.Local != w.Remote {
+		if w.VcsLocal.LocalRev != w.VcsRemote.RemoteRev {
 			out += "+"
 		} else {
 			out += " "

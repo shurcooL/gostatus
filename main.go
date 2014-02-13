@@ -48,10 +48,10 @@ func main() {
 
 	shouldShow := func(goPackage *GoPackage) bool {
 		// Check for notable status
-		return goPackage.Vcs != nil &&
-			(goPackage.LocalBranch != goPackage.Vcs.GetDefaultBranch() ||
-				goPackage.Status != "" ||
-				goPackage.Local != goPackage.Remote)
+		return goPackage.Dir.Repo != nil &&
+			(goPackage.Dir.Repo.VcsLocal.LocalBranch != goPackage.Dir.Repo.Vcs.GetDefaultBranch() ||
+				goPackage.Dir.Repo.VcsLocal.Status != "" ||
+				goPackage.Dir.Repo.VcsLocal.LocalRev != goPackage.Dir.Repo.VcsRemote.RemoteRev)
 	}
 
 	if *allFlag == true {
@@ -74,8 +74,8 @@ func main() {
 		if goPackage := GoPackageFromImportPath(in); goPackage != nil {
 			if !goPackage.Standard {
 				// HACK: Check that the same repo hasn't already been done
-				if goPackage.UpdateVcs(); goPackage.Vcs != nil {
-					rootPath := goPackage.Vcs.RootPath()
+				if goPackage.UpdateVcs(); goPackage.Dir.Repo != nil {
+					rootPath := goPackage.Dir.Repo.Vcs.RootPath()
 					lock.Lock()
 					if !checkedRepos[rootPath] {
 						checkedRepos[rootPath] = true
