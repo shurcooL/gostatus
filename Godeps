@@ -36,15 +36,15 @@
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/exp/12",
-			"Rev": "0c7ff4088dae0001f615a5414dda6cdbd4b4d27a"
+			"Rev": "cccada5a6805168387e661e16172b997d2ba860e"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/exp/13",
-			"Rev": "0c7ff4088dae0001f615a5414dda6cdbd4b4d27a"
+			"Rev": "cccada5a6805168387e661e16172b997d2ba860e"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/vcs",
-			"Rev": "0c7ff4088dae0001f615a5414dda6cdbd4b4d27a"
+			"Rev": "cccada5a6805168387e661e16172b997d2ba860e"
 		}
 	]
 }
