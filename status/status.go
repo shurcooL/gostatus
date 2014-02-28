@@ -1,6 +1,8 @@
 package status
 
 import (
+	"fmt"
+
 	// TODO: Make a note about these imports...
 	//       Until then, see their godoc pages:
 	. "gist.github.com/7480523.git" // http://godoc.org/gist.github.com/7480523.git
@@ -77,6 +79,25 @@ var PlumbingPresenter GoPackageStringer = func(w *GoPackage) string {
 	}
 
 	out += " " + w.Bpkg.ImportPath
+
+	return out
+}
+
+// DebugPresenter gives debug output.
+//
+// It currently is, and must remain read-only and safe for concurrent execution.
+var DebugPresenter GoPackageStringer = func(w *GoPackage) string {
+	out := w.Bpkg.ImportPath
+
+	out += fmt.Sprintf("\tw.Dir.Repo=%p", w.Dir.Repo)
+
+	if w := w.Dir.Repo; w != nil {
+		out += fmt.Sprintf("\tLocalBranch=%q", w.VcsLocal.LocalBranch)
+		out += fmt.Sprintf("\tDefaultBranch=%q", w.Vcs.GetDefaultBranch())
+		out += fmt.Sprintf("\tStatus=%q", w.VcsLocal.Status)
+		out += fmt.Sprintf("\tLocalRev=%q", w.VcsLocal.LocalRev)
+		out += fmt.Sprintf("\tRemoteRev=%q", w.VcsRemote.RemoteRev)
+	}
 
 	return out
 }
