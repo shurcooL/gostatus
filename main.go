@@ -18,6 +18,7 @@ import (
 
 var allFlag = flag.Bool("all", false, "Show all Go packages, not just ones with notable status.")
 var plumbingFlag = flag.Bool("plumbing", false, "Give the output in an easy-to-parse format for scripts.")
+var debugFlag = flag.Bool("debug", false, "Give the output with verbose debug information.")
 
 func usage() {
 	fmt.Fprint(os.Stderr, "Usage: [newline separated packages] | gostatus [--all] [--plumbing]\n")
@@ -31,7 +32,7 @@ Examples:
   go list -f '{{join .Deps "\n"}}' . | gostatus --all
 
 Legend:
-  @ - Vcs repo
+  ? - Not under (recognized) version control
   b - Non-master branch checked out
   * - Uncommited changes in working dir
   + - Update available (latest remote revision doesn't match local revision)
@@ -60,7 +61,9 @@ func main() {
 
 	var presenter GoPackageStringer = status.PorcelainPresenter
 
-	if *plumbingFlag == true {
+	if *debugFlag == true {
+		presenter = status.DebugPresenter
+	} else if *plumbingFlag == true {
 		presenter = status.PlumbingPresenter
 	}
 
