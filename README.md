@@ -31,7 +31,7 @@ Examples:
   go list -f '{{join .Deps "\n"}}' . | gostatus --all
 
 Legend:
-  @ - Vcs repo
+  ? - Not under (recognized) version control
   b - Non-master branch checked out
   * - Uncommited changes in working dir
   + - Update available (latest remote revision doesn't match local revision)
@@ -63,10 +63,10 @@ Sample Output
 
 ```bash
 $ go list all | gostatus
-@  +  github.com/dchest/uniuri
-@  +  github.com/syndtr/goleveldb/leveldb
-@b    github.com/shurcooL/go-goon
-@ * / github.com/shurcooL/Conception-go
+   +  github.com/dchest/uniuri
+   +  github.com/syndtr/goleveldb/leveldb
+ b    github.com/shurcooL/go-goon
+  * / github.com/shurcooL/Conception-go
 ```
 
 There are a few observations that can be made from that sample output.
