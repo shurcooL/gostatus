@@ -89,9 +89,10 @@ var PlumbingPresenter GoPackageStringer = func(w *GoPackage) string {
 var DebugPresenter GoPackageStringer = func(w *GoPackage) string {
 	out := w.Bpkg.ImportPath
 
-	out += fmt.Sprintf("\tw.Dir.Repo=%p", w.Dir.Repo)
+	out += fmt.Sprintf("\tgoPackage.Dir.Repo=%p", w.Dir.Repo)
 
 	if w := w.Dir.Repo; w != nil {
+		out += fmt.Sprintf("\tRootPath=%q", w.Vcs.RootPath())
 		out += fmt.Sprintf("\tLocalBranch=%q", w.VcsLocal.LocalBranch)
 		out += fmt.Sprintf("\tDefaultBranch=%q", w.Vcs.GetDefaultBranch())
 		out += fmt.Sprintf("\tStatus=%q", w.VcsLocal.Status)
