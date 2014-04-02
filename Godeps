@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/shurcooL/gostatus",
-	"GoVersion": "go1.2",
+	"GoVersion": "go1.2.1",
 	"Deps": [
 		{
 			"ImportPath": "gist.github.com/5258650.git",
@@ -20,11 +20,11 @@
 		},
 		{
 			"ImportPath": "gist.github.com/7480523.git",
-			"Rev": "69c3009521c0a895fcda83b16a14a8748edddcce"
+			"Rev": "0e0191d3a335967d13662d5c8c1ddaf081422827"
 		},
 		{
 			"ImportPath": "gist.github.com/7519227.git",
-			"Rev": "4bdaecdb54a7915b40fe36c3e5b83a93a4f8c9c6"
+			"Rev": "15510c80d6c8c29e393aeb455a5e57908c0c6269"
 		},
 		{
 			"ImportPath": "gist.github.com/7651991.git",
@@ -32,19 +32,19 @@
 		},
 		{
 			"ImportPath": "gist.github.com/7802150.git",
-			"Rev": "bfb787f1fc6b8c3d192cebe3887bf041f1147053"
+			"Rev": "dd8953796d25932c20115650ab83d48509e9aea6"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/exp/12",
-			"Rev": "2b4adbf6c5b812fe3c847032b58d8c717eae4f09"
+			"Rev": "aa033c27f988a7026b45f51e844e3407e0092402"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/exp/13",
-			"Rev": "2b4adbf6c5b812fe3c847032b58d8c717eae4f09"
+			"Rev": "aa033c27f988a7026b45f51e844e3407e0092402"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/vcs",
-			"Rev": "2b4adbf6c5b812fe3c847032b58d8c717eae4f09"
+			"Rev": "aa033c27f988a7026b45f51e844e3407e0092402"
 		}
 	]
 }
