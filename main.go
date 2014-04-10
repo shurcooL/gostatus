@@ -21,7 +21,7 @@ var plumbingFlag = flag.Bool("plumbing", false, "Give the output in an easy-to-p
 var debugFlag = flag.Bool("debug", false, "Give the output with verbose debug information.")
 
 func usage() {
-	fmt.Fprint(os.Stderr, "Usage: [newline separated packages] | gostatus [--all] [--plumbing]\n")
+	fmt.Fprint(os.Stderr, "Usage: [newline separated packages] | gostatus [flags]\n")
 	flag.PrintDefaults()
 	fmt.Fprint(os.Stderr, `
 Examples:
@@ -32,11 +32,11 @@ Examples:
   go list -f '{{join .Deps "\n"}}' . | gostatus --all
 
 Legend:
-  ? - Not under (recognized) version control
+  ??? - Not under (recognized) version control
   b - Non-master branch checked out
   * - Uncommited changes in working dir
-  + - Update available (latest remote revision doesn't match local revision)
-  / - Command (package main)
+  + - Update available (latest remote revision doesn't match local revision),
+  ! - No remote
 `)
 	os.Exit(2)
 }

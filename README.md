@@ -19,8 +19,9 @@ Usage
 -----
 
 ```bash
-Usage: [newline separated packages] | gostatus [--all] [--plumbing]
+Usage: [newline separated packages] | gostatus [flags]
   -all=false: Show all Go packages, not just ones with notable status.
+  -debug=false: Give the output with verbose debug information.
   -plumbing=false: Give the output in an easy-to-parse format for scripts.
 
 Examples:
@@ -31,11 +32,11 @@ Examples:
   go list -f '{{join .Deps "\n"}}' . | gostatus --all
 
 Legend:
-  ? - Not under (recognized) version control
+  ??? - Not under (recognized) version control
   b - Non-master branch checked out
   * - Uncommited changes in working dir
-  + - Update available (latest remote revision doesn't match local revision)
-  / - Command (package main)
+  + - Update available (latest remote revision doesn't match local revision),
+  ! - No remote
 ```
 
 Examples
@@ -63,10 +64,10 @@ Sample Output
 
 ```bash
 $ go list all | gostatus
-   +  github.com/dchest/uniuri
-   +  github.com/syndtr/goleveldb/leveldb
- b    github.com/shurcooL/go-goon
-  * / github.com/shurcooL/Conception-go
+  + github.com/dchest/uniuri
+  + github.com/syndtr/goleveldb/leveldb
+b   github.com/shurcooL/go-goon
+ *  github.com/shurcooL/Conception-go
 ```
 
 There are a few observations that can be made from that sample output.
