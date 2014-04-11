@@ -76,8 +76,3 @@ There are a few observations that can be made from that sample output.
 - `go-goon` package has a branch other than ***master*** checked out, I should be aware of that.
 - `Conception-go` package has ***uncommited changes***. I should remember to commit or discard the changes.
 - All other packages are ***up to date*** and looking good (they're not listed unless `--all` is used).
-
-Caveats
--------
-
-- It currently lists one Go package per repo (if there are many, one is chosen randomly). I'm thinking if this can be improved in [#13](https://github.com/shurcooL/gostatus/issues/13).
