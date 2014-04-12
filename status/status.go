@@ -2,6 +2,7 @@ package status
 
 import (
 	"fmt"
+	"strings"
 
 	// TODO: Make a note about these imports...
 	//       Until then, see their godoc pages:
@@ -15,7 +16,6 @@ var PorcelainPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 	out := ""
 
 	if repo := goPackage.Dir.Repo; repo != nil {
-		out += " "
 		if repo.VcsLocal.LocalBranch != repo.Vcs.GetDefaultBranch() {
 			out += "b"
 		} else {
@@ -27,20 +27,21 @@ var PorcelainPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 			out += " "
 		}
 		if repo.VcsLocal.LocalRev != repo.VcsRemote.RemoteRev {
-			out += "+"
+			if repo.VcsRemote.RemoteRev != "" {
+				out += "+"
+			} else {
+				out += "!"
+			}
 		} else {
 			out += " "
 		}
-	} else {
-		out += "?   "
-	}
-	if goPackage.Bpkg.IsCommand() {
-		out += "/"
-	} else {
-		out += " "
-	}
 
-	out += " " + goPackage.Bpkg.ImportPath
+		out += " " + strings.TrimPrefix(repo.Vcs.RootPath(), goPackage.Bpkg.SrcRoot+"/") + "/..."
+	} else {
+		out += "???"
+
+		out += " " + goPackage.Bpkg.ImportPath
+	}
 
 	return out
 }
@@ -90,6 +91,7 @@ var DebugPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 	out := goPackage.Bpkg.ImportPath
 
 	out += fmt.Sprintf("\tgoPackage.Dir.Repo=%p", goPackage.Dir.Repo)
+	out += fmt.Sprintf("\tgoPackage.Bpkg.SrcRoot=%q", goPackage.Bpkg.SrcRoot)
 
 	if repo := goPackage.Dir.Repo; repo != nil {
 		out += fmt.Sprintf("\tRootPath=%q", repo.Vcs.RootPath())

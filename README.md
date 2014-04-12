@@ -1,7 +1,7 @@
 gostatus
 ========
 
-A command line tool that shows the status of (many) Go packages.
+A command line tool that shows the status of (many) Go package repositories.
 
 Installation
 ------------
@@ -19,8 +19,9 @@ Usage
 -----
 
 ```bash
-Usage: [newline separated packages] | gostatus [--all] [--plumbing]
+Usage: [newline separated packages] | gostatus [flags]
   -all=false: Show all Go packages, not just ones with notable status.
+  -debug=false: Give the output with verbose debug information.
   -plumbing=false: Give the output in an easy-to-parse format for scripts.
 
 Examples:
@@ -31,11 +32,11 @@ Examples:
   go list -f '{{join .Deps "\n"}}' . | gostatus --all
 
 Legend:
-  ? - Not under (recognized) version control
+  ??? - Not under (recognized) version control
   b - Non-master branch checked out
   * - Uncommited changes in working dir
-  + - Update available (latest remote revision doesn't match local revision)
-  / - Command (package main)
+  + - Update available (latest remote revision doesn't match local revision),
+  ! - No remote
 ```
 
 Examples
@@ -63,20 +64,15 @@ Sample Output
 
 ```bash
 $ go list all | gostatus
-   +  github.com/dchest/uniuri
-   +  github.com/syndtr/goleveldb/leveldb
- b    github.com/shurcooL/go-goon
-  * / github.com/shurcooL/Conception-go
+  + github.com/dchest/uniuri/...
+  + github.com/syndtr/goleveldb/...
+b   github.com/shurcooL/go-goon/...
+ *  github.com/shurcooL/Conception-go/...
 ```
 
 There are a few observations that can be made from that sample output.
 
-- `uniuri` and `leveldb` packages are ***out of date***, I should update them via `go get -u`.
-- `go-goon` package has a branch other than ***master*** checked out, I should be aware of that.
-- `Conception-go` package has ***uncommited changes***. I should remember to commit or discard the changes.
-- All other packages are ***up to date*** and looking good (they're not listed unless `--all` is used).
-
-Caveats
--------
-
-- It currently lists one Go package per repo (if there are many, one is chosen randomly). I'm thinking if this can be improved in [#13](https://github.com/shurcooL/gostatus/issues/13).
+- `uniuri` and `goleveldb` repos are ***out of date***, I should update them via `go get -u`.
+- `go-goon` repo has a ***non-default*** branch checked out, I should be aware of that.
+- `Conception-go` repo has ***uncommited changes***. I should remember to commit or discard the changes.
+- All other repos are ***up to date*** and looking good (they're not displayed unless `--all` is used).
