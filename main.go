@@ -2,23 +2,32 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"os"
 	"runtime"
 	"sync"
+	"time"
 
+	"github.com/shurcooL/go/u/u3"
+	"github.com/shurcooL/go/u/u6"
+	"github.com/shurcooL/go/vcs"
 	"github.com/shurcooL/gostatus/status"
 
 	// TODO: Make a note about these imports...
 	//       Until then, see their godoc pages:
 	. "gist.github.com/7480523.git" // http://godoc.org/gist.github.com/7480523.git
 	. "gist.github.com/7651991.git" // http://godoc.org/gist.github.com/7651991.git
+	. "gist.github.com/7802150.git"
 )
 
 var allFlag = flag.Bool("all", false, "Show all Go packages, not just ones with notable status.")
 var plumbingFlag = flag.Bool("plumbing", false, "Give the output in an easy-to-parse format for scripts.")
 var debugFlag = flag.Bool("debug", false, "Give the output with verbose debug information.")
+
+var doDiffFlag = flag.Bool("d", false, "display diffs instead of rewriting files")
+var offlineFlag = flag.Bool("offline", false, "Don't use the internet.")
 
 func usage() {
 	fmt.Fprint(os.Stderr, "Usage: [newline separated packages] | gostatus [flags]\n")
@@ -47,12 +56,14 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
+	started := time.Now()
+
 	shouldShow := func(goPackage *GoPackage) bool {
 		// Check for notable status
 		return goPackage.Dir.Repo != nil &&
 			(goPackage.Dir.Repo.VcsLocal.LocalBranch != goPackage.Dir.Repo.Vcs.GetDefaultBranch() ||
 				goPackage.Dir.Repo.VcsLocal.Status != "" ||
-				goPackage.Dir.Repo.VcsLocal.LocalRev != goPackage.Dir.Repo.VcsRemote.RemoteRev)
+				(*offlineFlag == false && goPackage.Dir.Repo.VcsLocal.LocalRev != goPackage.Dir.Repo.VcsRemote.RemoteRev))
 	}
 
 	if *allFlag == true {
@@ -90,9 +101,17 @@ func main() {
 					}
 				}
 
-				goPackage.UpdateVcsFields()
+				if goPackage.Dir.Repo != nil {
+					MakeUpdated(goPackage.Dir.Repo.VcsLocal)
+					if *offlineFlag == false {
+						MakeUpdated(goPackage.Dir.Repo.VcsRemote)
+					}
+				}
 				if shouldShow(goPackage) == false {
 					return nil
+				}
+				if *doDiffFlag == true && goPackage.Dir.Repo.Vcs.Type() == vcs.Git && goPackage.Dir.Repo.VcsLocal.Status != "" {
+					return presenter(goPackage) + "\n---\n\n```\n" + goPackage.Dir.Repo.VcsLocal.Status + "```\n\n```diff\n" + u6.GoPackageWorkingDiff(goPackage) + "\n```"
 				}
 				return presenter(goPackage)
 			}
@@ -104,7 +123,18 @@ func main() {
 	outChan := GoReduceLinesFromReader(os.Stdin, 8, reduceFunc)
 
 	// Output results
-	for out := range outChan {
-		fmt.Println(out.(string))
+	if *doDiffFlag == false {
+		for out := range outChan {
+			fmt.Fprintln(os.Stdout, out.(string))
+		}
+	} else {
+		var buf bytes.Buffer
+		for out := range outChan {
+			fmt.Fprintln(&buf, out.(string))
+		}
+
+		fmt.Printf("diffHandler: %v ms.\n", time.Since(started).Seconds()*1000)
+
+		u3.DisplayMarkdownInBrowser(buf.Bytes())
 	}
 }
