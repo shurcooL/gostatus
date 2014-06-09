@@ -25,10 +25,10 @@ func usage() {
 	flag.PrintDefaults()
 	fmt.Fprint(os.Stderr, `
 Examples:
-  # Show status of packages with notable status
+  # Show status of packages with notable status.
   go list all | gostatus
 
-  # Show status of all dependencies (recursive) of package in cur working dir
+  # Show status of all dependencies (recursive) of package in cur working dir.
   go list -f '{{join .Deps "\n"}}' . | gostatus --all
 
 Legend:
@@ -48,11 +48,8 @@ func main() {
 	flag.Parse()
 
 	shouldShow := func(goPackage *GoPackage) bool {
-		// Check for notable status
-		return goPackage.Dir.Repo != nil &&
-			(goPackage.Dir.Repo.VcsLocal.LocalBranch != goPackage.Dir.Repo.Vcs.GetDefaultBranch() ||
-				goPackage.Dir.Repo.VcsLocal.Status != "" ||
-				goPackage.Dir.Repo.VcsLocal.LocalRev != goPackage.Dir.Repo.VcsRemote.RemoteRev)
+		// Check for notable status.
+		return status.PorcelainPresenter(goPackage)[:3] != "   " // Assumes status.PorcelainPresenter output is always at least 3 bytes.
 	}
 
 	if *allFlag == true {
