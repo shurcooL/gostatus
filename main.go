@@ -36,7 +36,8 @@ Legend:
   b - Non-master branch checked out
   * - Uncommited changes in working dir
   + - Update available (latest remote revision doesn't match local revision),
-  ! - No remote
+  ! - No remote,
+  # - Remote path doesn't match import path
 `)
 	os.Exit(2)
 }

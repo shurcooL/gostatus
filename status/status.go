@@ -16,6 +16,8 @@ var PorcelainPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 	out := ""
 
 	if repo := goPackage.Dir.Repo; repo != nil {
+		repoRootImportPath := strings.TrimPrefix(repo.Vcs.RootPath(), goPackage.Bpkg.SrcRoot+"/")
+
 		if repo.VcsLocal.LocalBranch != repo.Vcs.GetDefaultBranch() {
 			out += "b"
 		} else {
@@ -26,7 +28,13 @@ var PorcelainPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 		} else {
 			out += " "
 		}
-		if repo.VcsLocal.LocalRev != repo.VcsRemote.RemoteRev {
+		if (strings.HasPrefix(repoRootImportPath, "github.com/") &&
+			repo.VcsLocal.Remote != "https://"+repoRootImportPath &&
+			repo.VcsLocal.Remote != "https://"+repoRootImportPath+".git") ||
+			(strings.HasPrefix(repoRootImportPath, "code.google.com/") &&
+				repo.VcsLocal.Remote != "https://"+repoRootImportPath) {
+			out += "#"
+		} else if repo.VcsLocal.LocalRev != repo.VcsRemote.RemoteRev {
 			if repo.VcsRemote.RemoteRev != "" {
 				out += "+"
 			} else {
@@ -36,7 +44,7 @@ var PorcelainPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 			out += " "
 		}
 
-		out += " " + strings.TrimPrefix(repo.Vcs.RootPath(), goPackage.Bpkg.SrcRoot+"/") + "/..."
+		out += " " + repoRootImportPath + "/..."
 	} else {
 		out += "???"
 
@@ -98,6 +106,7 @@ var DebugPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 		out += fmt.Sprintf("\tLocalBranch=%q", repo.VcsLocal.LocalBranch)
 		out += fmt.Sprintf("\tDefaultBranch=%q", repo.Vcs.GetDefaultBranch())
 		out += fmt.Sprintf("\tStatus=%q", repo.VcsLocal.Status)
+		out += fmt.Sprintf("\tRemote=%q", repo.VcsLocal.Remote)
 		out += fmt.Sprintf("\tLocalRev=%q", repo.VcsLocal.LocalRev)
 		out += fmt.Sprintf("\tRemoteRev=%q", repo.VcsRemote.RemoteRev)
 	}

@@ -25,10 +25,10 @@ Usage: [newline separated packages] | gostatus [flags]
   -plumbing=false: Give the output in an easy-to-parse format for scripts.
 
 Examples:
-  # Show status of packages with notable status
+  # Show status of packages with notable status.
   go list all | gostatus
 
-  # Show status of all dependencies (recursive) of package in cur working dir
+  # Show status of all dependencies (recursive) of package in cur working dir.
   go list -f '{{join .Deps "\n"}}' . | gostatus --all
 
 Legend:
@@ -36,7 +36,8 @@ Legend:
   b - Non-master branch checked out
   * - Uncommited changes in working dir
   + - Update available (latest remote revision doesn't match local revision),
-  ! - No remote
+  ! - No remote,
+  # - Remote path doesn't match import path
 ```
 
 Examples
@@ -68,6 +69,7 @@ $ go list all | gostatus
   + github.com/syndtr/goleveldb/...
 b   github.com/shurcooL/go-goon/...
  *  github.com/shurcooL/Conception-go/...
+  # github.com/russross/blackfriday/...
 ```
 
 There are a few observations that can be made from that sample output.
@@ -75,4 +77,5 @@ There are a few observations that can be made from that sample output.
 - `uniuri` and `goleveldb` repos are ***out of date***, I should update them via `go get -u`.
 - `go-goon` repo has a ***non-default*** branch checked out, I should be aware of that.
 - `Conception-go` repo has ***uncommited changes***. I should remember to commit or discard the changes.
+- `blackfriday` repo has a remote that doesn't match its import path. It's likely my fork in place of the original repo for temporary development purposes.
 - All other repos are ***up to date*** and looking good (they're not displayed unless `--all` is used).
