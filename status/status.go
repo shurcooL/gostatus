@@ -16,7 +16,7 @@ var PorcelainPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 	out := ""
 
 	if repo := goPackage.Dir.Repo; repo != nil {
-		repoRootImportPath := strings.TrimPrefix(repo.Vcs.RootPath(), goPackage.Bpkg.SrcRoot+"/")
+		repoImportPath := GetRepoImportPath(repo.Vcs.RootPath(), goPackage.Bpkg.SrcRoot)
 
 		if repo.VcsLocal.LocalBranch != repo.Vcs.GetDefaultBranch() {
 			out += "b"
@@ -28,11 +28,11 @@ var PorcelainPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 		} else {
 			out += " "
 		}
-		if (strings.HasPrefix(repoRootImportPath, "github.com/") &&
-			repo.VcsLocal.Remote != "https://"+repoRootImportPath &&
-			repo.VcsLocal.Remote != "https://"+repoRootImportPath+".git") ||
-			(strings.HasPrefix(repoRootImportPath, "code.google.com/") &&
-				repo.VcsLocal.Remote != "https://"+repoRootImportPath) {
+		if (strings.HasPrefix(repoImportPath, "github.com/") &&
+			repo.VcsLocal.Remote != "https://"+repoImportPath &&
+			repo.VcsLocal.Remote != "https://"+repoImportPath+".git") ||
+			(strings.HasPrefix(repoImportPath, "code.google.com/") &&
+				repo.VcsLocal.Remote != "https://"+repoImportPath) {
 			out += "#"
 		} else if repo.VcsLocal.LocalRev != repo.VcsRemote.RemoteRev {
 			if repo.VcsRemote.RemoteRev != "" {
@@ -44,7 +44,7 @@ var PorcelainPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 			out += " "
 		}
 
-		out += " " + repoRootImportPath + "/..."
+		out += " " + repoImportPath + "/..."
 	} else {
 		out += "???"
 
