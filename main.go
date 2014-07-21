@@ -32,12 +32,13 @@ Examples:
   go list -f '{{join .Deps "\n"}}' . | gostatus --all
 
 Legend:
-  ??? - Not under (recognized) version control
+  ???? - Not under (recognized) version control
   b - Non-master branch checked out
   * - Uncommited changes in working dir
   + - Update available (latest remote revision doesn't match local revision),
   ! - No remote,
   # - Remote path doesn't match import path
+  $ - Stash exists
 `)
 	os.Exit(2)
 }
@@ -50,7 +51,7 @@ func main() {
 
 	shouldShow := func(goPackage *GoPackage) bool {
 		// Check for notable status.
-		return status.PorcelainPresenter(goPackage)[:3] != "   " // Assumes status.PorcelainPresenter output is always at least 3 bytes.
+		return status.PorcelainPresenter(goPackage)[:4] != "    "
 	}
 
 	if *allFlag == true {

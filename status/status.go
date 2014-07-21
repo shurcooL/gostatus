@@ -12,7 +12,12 @@ import (
 // PorcelainPresenter is a simple porcelain presenter of GoPackage to humans.
 //
 // It currently is, and must remain read-only and safe for concurrent execution.
-var PorcelainPresenter GoPackageStringer = func(goPackage *GoPackage) string {
+var PorcelainPresenter GoPackageStringer = PlumbingPresenterV2
+
+// This format should remain stable across versions and regardless of user configuration.
+//
+// It currently is, and must remain read-only and safe for concurrent execution.
+var PlumbingPresenterV2 GoPackageStringer = func(goPackage *GoPackage) string {
 	out := ""
 
 	if repo := goPackage.Dir.Repo; repo != nil {
@@ -43,10 +48,15 @@ var PorcelainPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 		} else {
 			out += " "
 		}
+		if repo.VcsLocal.Stash != "" {
+			out += "$"
+		} else {
+			out += " "
+		}
 
 		out += " " + repoImportPath + "/..."
 	} else {
-		out += "???"
+		out += "????"
 
 		out += " " + goPackage.Bpkg.ImportPath
 	}
@@ -106,6 +116,7 @@ var DebugPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 		out += fmt.Sprintf("\tLocalBranch=%q", repo.VcsLocal.LocalBranch)
 		out += fmt.Sprintf("\tDefaultBranch=%q", repo.Vcs.GetDefaultBranch())
 		out += fmt.Sprintf("\tStatus=%q", repo.VcsLocal.Status)
+		out += fmt.Sprintf("\tStash=%q", repo.VcsLocal.Stash)
 		out += fmt.Sprintf("\tRemote=%q", repo.VcsLocal.Remote)
 		out += fmt.Sprintf("\tLocalRev=%q", repo.VcsLocal.LocalRev)
 		out += fmt.Sprintf("\tRemoteRev=%q", repo.VcsRemote.RemoteRev)
