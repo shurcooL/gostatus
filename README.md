@@ -7,12 +7,7 @@ Installation
 ------------
 
 ```bash
-mkdir /tmp/gostatus/ && GOPATH=/tmp/gostatus/ go get github.com/shurcooL/gostatus
-
-# Copy `/tmp/gostatus/bin/gostatus` to somewhere in your `$PATH`.
-cp /tmp/gostatus/bin/gostatus /usr/local/bin/
-
-# Feel free to remove `/tmp/gostatus/`.
+go get -u github.com/shurcooL/gostatus
 ```
 
 Usage

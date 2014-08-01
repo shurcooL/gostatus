@@ -10,10 +10,8 @@ import (
 
 	"github.com/shurcooL/gostatus/status"
 
-	// TODO: Make a note about these imports...
-	//       Until then, see their godoc pages:
-	. "gist.github.com/7480523.git" // http://godoc.org/gist.github.com/7480523.git
-	. "gist.github.com/7651991.git" // http://godoc.org/gist.github.com/7651991.git
+	. "github.com/shurcooL/go/gists/gist7480523"
+	. "github.com/shurcooL/go/gists/gist7651991"
 )
 
 var allFlag = flag.Bool("all", false, "Show all Go packages, not just ones with notable status.")

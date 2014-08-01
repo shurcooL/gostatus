@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	// TODO: Make a note about these imports...
-	//       Until then, see their godoc pages:
-	. "gist.github.com/7480523.git" // http://godoc.org/gist.github.com/7480523.git
+	. "github.com/shurcooL/go/gists/gist7480523"
 )
 
 // PorcelainPresenter is a simple porcelain presenter of GoPackage to humans.
