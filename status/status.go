@@ -39,7 +39,11 @@ var PlumbingPresenterV2 GoPackageStringer = func(goPackage *GoPackage) string {
 			out += "#"
 		} else if repo.VcsLocal.LocalRev != repo.VcsRemote.RemoteRev {
 			if repo.VcsRemote.RemoteRev != "" {
-				out += "+"
+				if !repo.VcsRemote.IsContained {
+					out += "+"
+				} else {
+					out += "-"
+				}
 			} else {
 				out += "!"
 			}
@@ -118,6 +122,7 @@ var DebugPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 		out += fmt.Sprintf("\tRemote=%q", repo.VcsLocal.Remote)
 		out += fmt.Sprintf("\tLocalRev=%q", repo.VcsLocal.LocalRev)
 		out += fmt.Sprintf("\tRemoteRev=%q", repo.VcsRemote.RemoteRev)
+		out += fmt.Sprintf("\tIsContained=%v", repo.VcsRemote.IsContained)
 	}
 
 	return out
