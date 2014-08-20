@@ -1,50 +1,50 @@
 {
 	"ImportPath": "github.com/shurcooL/gostatus",
-	"GoVersion": "go1.3",
+	"GoVersion": "go1.3.1",
 	"Deps": [
 		{
 			"ImportPath": "github.com/shurcooL/go/exp/12",
-			"Rev": "318582d41a7d120ccdd9a52c85d67d5e563173a0"
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/exp/13",
-			"Rev": "318582d41a7d120ccdd9a52c85d67d5e563173a0"
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/gists/gist5258650",
-			"Rev": "318582d41a7d120ccdd9a52c85d67d5e563173a0"
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/gists/gist5286084",
-			"Rev": "318582d41a7d120ccdd9a52c85d67d5e563173a0"
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/gists/gist5504644",
-			"Rev": "318582d41a7d120ccdd9a52c85d67d5e563173a0"
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/gists/gist5892738",
-			"Rev": "318582d41a7d120ccdd9a52c85d67d5e563173a0"
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/gists/gist7480523",
-			"Rev": "318582d41a7d120ccdd9a52c85d67d5e563173a0"
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/gists/gist7519227",
-			"Rev": "318582d41a7d120ccdd9a52c85d67d5e563173a0"
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/gists/gist7651991",
-			"Rev": "318582d41a7d120ccdd9a52c85d67d5e563173a0"
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/gists/gist7802150",
-			"Rev": "318582d41a7d120ccdd9a52c85d67d5e563173a0"
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
 		},
 		{
 			"ImportPath": "github.com/shurcooL/go/vcs",
-			"Rev": "318582d41a7d120ccdd9a52c85d67d5e563173a0"
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
 		}
 	]
 }

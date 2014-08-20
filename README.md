@@ -30,8 +30,9 @@ Legend:
   ???? - Not under (recognized) version control
   b - Non-master branch checked out
   * - Uncommited changes in working dir
-  + - Update available (latest remote revision doesn't match local revision),
-  ! - No remote,
+  + - Update available
+  - - Local revision is ahead of remote (need to push?)
+  ! - No remote
   # - Remote path doesn't match import path
   $ - Stash exists
 ```
