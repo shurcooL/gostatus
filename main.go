@@ -50,7 +50,7 @@ func main() {
 
 	shouldShow := func(goPackage *GoPackage) bool {
 		// Check for notable status.
-		return status.PorcelainPresenter(goPackage)[:4] != "    "
+		return status.PorcelainPresenter(goPackage)[:4] != "    " && status.PorcelainPresenter(goPackage)[:4] != "????"
 	}
 
 	if *allFlag == true {
