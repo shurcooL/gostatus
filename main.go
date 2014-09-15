@@ -12,6 +12,7 @@ import (
 
 	. "github.com/shurcooL/go/gists/gist7480523"
 	. "github.com/shurcooL/go/gists/gist7651991"
+	"github.com/shurcooL/go/gists/gist7802150"
 )
 
 var allFlag = flag.Bool("all", false, "Show all Go packages, not just ones with notable status.")
@@ -72,30 +73,38 @@ func main() {
 	// Input: Go package Import Path
 	// Output: If a valid Go package and not part of standard library, output a status string, else nil
 	reduceFunc := func(in string) interface{} {
-		if goPackage := GoPackageFromImportPath(in); goPackage != nil {
-			if !goPackage.Standard {
-				// HACK: Check that the same repo hasn't already been done
-				if goPackage.UpdateVcs(); goPackage.Dir.Repo != nil {
-					rootPath := goPackage.Dir.Repo.Vcs.RootPath()
-					lock.Lock()
-					if !checkedRepos[rootPath] {
-						checkedRepos[rootPath] = true
-						lock.Unlock()
-					} else {
-						lock.Unlock()
-						// TODO: Instead of skipping repos that were done, cache their state and reuse it
-						return nil
-					}
-				}
+		goPackage := GoPackageFromImportPath(in)
+		if goPackage == nil {
+			return nil
+		}
+		if goPackage.Standard {
+			return nil
+		}
 
-				goPackage.UpdateVcsFields()
-				if shouldShow(goPackage) == false {
-					return nil
-				}
-				return presenter(goPackage)
+		goPackage.UpdateVcs()
+		// HACK: Check that the same repo hasn't already been done
+		if goPackage.Dir.Repo != nil {
+			rootPath := goPackage.Dir.Repo.Vcs.RootPath()
+			lock.Lock()
+			if !checkedRepos[rootPath] {
+				checkedRepos[rootPath] = true
+				lock.Unlock()
+			} else {
+				lock.Unlock()
+				// TODO: Instead of skipping repos that were done, cache their state and reuse it
+				return nil
 			}
 		}
-		return nil
+
+		if goPackage.Dir.Repo != nil {
+			gist7802150.MakeUpdated(goPackage.Dir.Repo.VcsLocal)
+			gist7802150.MakeUpdated(goPackage.Dir.Repo.VcsRemote)
+		}
+
+		if shouldShow(goPackage) == false {
+			return nil
+		}
+		return presenter(goPackage)
 	}
 
 	// Run reduceFunc on all lines from stdin in parallel (max 8 goroutines)
