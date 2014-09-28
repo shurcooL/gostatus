@@ -14,17 +14,22 @@ Usage
 -----
 
 ```bash
-Usage: [newline separated packages] | gostatus [flags]
+Usage: gostatus [flags] [packages]
+       [newline separated packages] | gostatus --stdin [flags]
   -all=false: Show all Go packages, not just ones with notable status.
   -debug=false: Give the output with verbose debug information.
   -plumbing=false: Give the output in an easy-to-parse format for scripts.
+  -stdin=false: Read the list of newline separated Go packages from stdin.
 
 Examples:
-  # Show status of packages with notable status.
-  go list all | gostatus
+  # Show status of package in current directory, if notable.
+  gostatus .
+
+  # Show status of all packages with notable status.
+  gostatus all
 
   # Show status of all dependencies (recursive) of package in cur working dir.
-  go list -f '{{join .Deps "\n"}}' . | gostatus --all
+  go list -f '{{join .Deps "\n"}}' . | gostatus --stdin --all
 
 Legend:
   ???? - Not under (recognized) version control
@@ -42,19 +47,19 @@ Examples
 
 ```bash
 # Show status of all your packages
-$ go list all | gostatus
+$ gostatus all
 
-# Show status of package in current working dir
-$ go list . | gostatus
+# Show status of package in current directory
+$ gostatus .
 
 # Show status of specified package
-$ echo some/import/path | gostatus
+$ gostatus some/import/path
 
 # Show status of all dependencies (recursive) of package in current working dir
-$ go list -f '{{join .Deps "\n"}}' . | gostatus
+$ go list -f '{{join .Deps "\n"}}' . | gostatus --stdin --all
 
 # Show status of all dependencies (recursive) of specified package
-$ go list -f '{{join .Deps "\n"}}' some/import/path | gostatus
+$ go list -f '{{join .Deps "\n"}}' some/import/path | gostatus --stdin --all
 ```
 
 Sample Output
