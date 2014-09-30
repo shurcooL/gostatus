@@ -16,10 +16,10 @@ Usage
 ```bash
 Usage: gostatus [flags] [packages]
        [newline separated packages] | gostatus --stdin [flags]
-  -all=false: Show all Go packages, not just ones with notable status.
   -debug=false: Give the output with verbose debug information.
   -plumbing=false: Give the output in an easy-to-parse format for scripts.
   -stdin=false: Read the list of newline separated Go packages from stdin.
+  -v=false: Verbose output: show all Go packages, not just ones with notable status.
 
 Examples:
   # Show status of package in current directory, if notable.
@@ -29,7 +29,7 @@ Examples:
   gostatus all
 
   # Show status of all dependencies (recursive) of package in cur working dir.
-  go list -f '{{join .Deps "\n"}}' . | gostatus --stdin --all
+  go list -f '{{join .Deps "\n"}}' . | gostatus --stdin -v
 
 Legend:
   ???? - Not under (recognized) version control
@@ -56,10 +56,10 @@ $ gostatus .
 $ gostatus some/import/path
 
 # Show status of all dependencies (recursive) of package in current working dir
-$ go list -f '{{join .Deps "\n"}}' . | gostatus --stdin --all
+$ go list -f '{{join .Deps "\n"}}' . | gostatus --stdin -v
 
 # Show status of all dependencies (recursive) of specified package
-$ go list -f '{{join .Deps "\n"}}' some/import/path | gostatus --stdin --all
+$ go list -f '{{join .Deps "\n"}}' some/import/path | gostatus --stdin -v
 ```
 
 Sample Output
@@ -82,4 +82,4 @@ There are a few observations that can be made from that sample output.
 - `Conception-go` repo has ***uncommited changes***. I should remember to commit or discard the changes.
 - `blackfriday` repo has a ***remote that doesn't match its import path***. It's likely my fork in place of the original repo for temporary development purposes.
 - `bluemonday` repo has a ***stash***. Perhaps I have some unfinished and uncommited work that I should take care of.
-- All other repos are ***up to date*** and looking good (they're not displayed unless `--all` is used).
+- All other repos are ***up to date*** and looking good (they're not displayed unless `-v` is used).

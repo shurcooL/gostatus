@@ -18,7 +18,7 @@ import (
 
 const numWorkers = 8
 
-var allFlag = flag.Bool("all", false, "Show all Go packages, not just ones with notable status.")
+var vFlag = flag.Bool("v", false, "Verbose output: show all Go packages, not just ones with notable status.")
 var stdinFlag = flag.Bool("stdin", false, "Read the list of newline separated Go packages from stdin.")
 var plumbingFlag = flag.Bool("plumbing", false, "Give the output in an easy-to-parse format for scripts.")
 var debugFlag = flag.Bool("debug", false, "Give the output with verbose debug information.")
@@ -36,7 +36,7 @@ Examples:
   gostatus all
 
   # Show status of all dependencies (recursive) of package in cur working dir.
-  go list -f '{{join .Deps "\n"}}' . | gostatus --stdin --all
+  go list -f '{{join .Deps "\n"}}' . | gostatus --stdin -v
 
 Legend:
   ???? - Not under (recognized) version control
@@ -67,7 +67,7 @@ func main() {
 		// Check for notable status.
 		return status.PorcelainPresenter(goPackage)[:4] != "    "
 	}
-	if *allFlag == true {
+	if *vFlag == true {
 		shouldShow = func(_ *gist7480523.GoPackage) bool { return true }
 	}
 
