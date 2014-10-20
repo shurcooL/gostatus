@@ -85,7 +85,11 @@ func main() {
 	// Input: Go package Import Path
 	// Output: If a valid Go package and not part of standard library, output a status string, else nil.
 	reduceFunc := func(in string) interface{} {
-		goPackage := gist7480523.GoPackageFromPath(in, wd)
+		goPackage, err := gist7480523.GoPackageFromPath(in, wd)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "can't load package: %s\n", err)
+			return nil
+		}
 		if goPackage == nil {
 			return nil
 		}
