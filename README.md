@@ -60,6 +60,9 @@ $ go list -f '{{join .Deps "\n"}}' . | gostatus --stdin -v
 
 # Show status of all dependencies (recursive) of specified package
 $ go list -f '{{join .Deps "\n"}}' some/import/path | gostatus --stdin -v
+
+# Run go get -u on all reported updates
+$ gostatus -plumbing all | sed '/^@  +. /!d; s///' | xargs go get -u
 ```
 
 Sample Output
