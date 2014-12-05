@@ -83,7 +83,7 @@ func main() {
 	checkedRepos := map[string]bool{}
 
 	// Input: Go package Import Path
-	// Output: If a valid Go package and not part of standard library, output a status string, else nil.
+	// Output: If a valid Go package and not inside GOROOT, output a status string, else nil.
 	reduceFunc := func(in string) interface{} {
 		goPackage, err := gist7480523.GoPackageFromPath(in, wd)
 		if err != nil {
@@ -93,7 +93,7 @@ func main() {
 		if goPackage == nil {
 			return nil
 		}
-		if goPackage.Standard {
+		if goPackage.Bpkg.Goroot {
 			return nil
 		}
 
