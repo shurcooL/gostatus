@@ -1,7 +1,7 @@
 gostatus [![Build Status](https://travis-ci.org/shurcooL/gostatus.svg?branch=master)](https://travis-ci.org/shurcooL/gostatus)
 ========
 
-A command line tool that shows the status of (many) Go package repositories.
+A command line tool, shows the status of repositories that contain Go packages.
 
 Installation
 ------------
