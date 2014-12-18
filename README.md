@@ -17,6 +17,7 @@ Usage
 Usage: gostatus [flags] [packages]
        [newline separated packages] | gostatus --stdin [flags]
   -debug=false: Give the output with verbose debug information.
+  -f=false: Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.
   -plumbing=false: Give the output in an easy-to-parse format for scripts.
   -stdin=false: Read the list of newline separated Go packages from stdin.
   -v=false: Verbose output: show all Go packages, not just ones with notable status.

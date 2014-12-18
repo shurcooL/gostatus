@@ -13,7 +13,6 @@ import (
 
 	"github.com/shurcooL/go/gists/gist7480523"
 	"github.com/shurcooL/go/gists/gist7651991"
-	"github.com/shurcooL/go/gists/gist7802150"
 )
 
 const numWorkers = 8
@@ -22,6 +21,10 @@ var vFlag = flag.Bool("v", false, "Verbose output: show all Go packages, not jus
 var stdinFlag = flag.Bool("stdin", false, "Read the list of newline separated Go packages from stdin.")
 var plumbingFlag = flag.Bool("plumbing", false, "Give the output in an easy-to-parse format for scripts.")
 var debugFlag = flag.Bool("debug", false, "Give the output with verbose debug information.")
+
+func init() {
+	flag.BoolVar(&status.FFlag, "f", false, "Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.")
+}
 
 func usage() {
 	fmt.Fprint(os.Stderr, "Usage: gostatus [flags] [packages]\n")
@@ -112,10 +115,7 @@ func main() {
 			}
 		}
 
-		if goPackage.Dir.Repo != nil {
-			gist7802150.MakeUpdated(goPackage.Dir.Repo.VcsLocal)
-			gist7802150.MakeUpdated(goPackage.Dir.Repo.VcsRemote)
-		}
+		goPackage.UpdateVcsFields()
 
 		if shouldShow(goPackage) == false {
 			return nil

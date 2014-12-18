@@ -2,7 +2,6 @@ package status
 
 import (
 	"fmt"
-	"strings"
 
 	. "github.com/shurcooL/go/gists/gist7480523"
 )
@@ -11,6 +10,9 @@ import (
 //
 // It currently is, and must remain read-only and safe for concurrent execution.
 var PorcelainPresenter GoPackageStringer = PlumbingPresenterV2
+
+// Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.
+var FFlag bool
 
 // This format should remain stable across versions and regardless of user configuration.
 //
@@ -31,11 +33,7 @@ var PlumbingPresenterV2 GoPackageStringer = func(goPackage *GoPackage) string {
 		} else {
 			out += " "
 		}
-		if (strings.HasPrefix(repoImportPath, "github.com/") &&
-			repo.VcsLocal.Remote != "https://"+repoImportPath &&
-			repo.VcsLocal.Remote != "https://"+repoImportPath+".git") ||
-			(strings.HasPrefix(repoImportPath, "code.google.com/") &&
-				repo.VcsLocal.Remote != "https://"+repoImportPath) {
+		if !FFlag && (repo.RepoRoot == nil || repo.RepoRoot.Repo != repo.VcsLocal.Remote) {
 			out += "#"
 		} else if repo.VcsLocal.LocalRev != repo.VcsRemote.RemoteRev {
 			if repo.VcsRemote.RemoteRev != "" {
