@@ -128,9 +128,6 @@ func main() {
 	switch *stdinFlag {
 	case false:
 		importPathPatterns := flag.Args()
-		if len(importPathPatterns) == 0 {
-			importPathPatterns = []string{"."}
-		}
 		importPaths := gotool.ImportPaths(importPathPatterns)
 		outChan = gist7651991.GoReduceLinesFromSlice(importPaths, numWorkers, reduceFunc)
 	case true:
