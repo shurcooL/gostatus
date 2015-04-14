@@ -3,13 +3,13 @@ package status
 import (
 	"fmt"
 
-	. "github.com/shurcooL/go/gists/gist7480523"
+	"github.com/shurcooL/go/gists/gist7480523"
 )
 
 // PorcelainPresenter is a simple porcelain presenter of GoPackage to humans.
 //
 // It currently is, and must remain read-only and safe for concurrent execution.
-var PorcelainPresenter GoPackageStringer = PlumbingPresenterV2
+var PorcelainPresenter gist7480523.GoPackageStringer = PlumbingPresenterV2
 
 // Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.
 var FFlag bool
@@ -17,11 +17,11 @@ var FFlag bool
 // This format should remain stable across versions and regardless of user configuration.
 //
 // It currently is, and must remain read-only and safe for concurrent execution.
-var PlumbingPresenterV2 GoPackageStringer = func(goPackage *GoPackage) string {
+var PlumbingPresenterV2 gist7480523.GoPackageStringer = func(goPackage *gist7480523.GoPackage) string {
 	out := ""
 
 	if repo := goPackage.Dir.Repo; repo != nil {
-		repoImportPath := GetRepoImportPath(repo.Vcs.RootPath(), goPackage.Bpkg.SrcRoot)
+		repoImportPath := gist7480523.GetRepoImportPath(repo.Vcs.RootPath(), goPackage.Bpkg.SrcRoot)
 
 		if repo.VcsLocal.LocalBranch != repo.Vcs.GetDefaultBranch() {
 			out += "b"
@@ -68,7 +68,7 @@ var PlumbingPresenterV2 GoPackageStringer = func(goPackage *GoPackage) string {
 // This format should remain stable across versions and regardless of user configuration.
 //
 // It currently is, and must remain read-only and safe for concurrent execution.
-var PlumbingPresenter GoPackageStringer = func(goPackage *GoPackage) string {
+var PlumbingPresenter gist7480523.GoPackageStringer = func(goPackage *gist7480523.GoPackage) string {
 	out := ""
 
 	if repo := goPackage.Dir.Repo; repo != nil {
@@ -105,7 +105,7 @@ var PlumbingPresenter GoPackageStringer = func(goPackage *GoPackage) string {
 // DebugPresenter gives debug output.
 //
 // It currently is, and must remain read-only and safe for concurrent execution.
-var DebugPresenter GoPackageStringer = func(goPackage *GoPackage) string {
+var DebugPresenter gist7480523.GoPackageStringer = func(goPackage *gist7480523.GoPackage) string {
 	out := goPackage.Bpkg.ImportPath
 
 	out += fmt.Sprintf("\tgoPackage.Dir.Repo=%p", goPackage.Dir.Repo)
