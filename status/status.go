@@ -117,6 +117,11 @@ var DebugPresenter gist7480523.GoPackageStringer = func(goPackage *gist7480523.G
 		out += fmt.Sprintf("\tDefaultBranch=%q", repo.Vcs.GetDefaultBranch())
 		out += fmt.Sprintf("\tStatus=%q", repo.VcsLocal.Status)
 		out += fmt.Sprintf("\tStash=%q", repo.VcsLocal.Stash)
+		if repo.RepoRoot == nil {
+			out += fmt.Sprintf("\tRepoRoot=<nil>")
+		} else {
+			out += fmt.Sprintf("\tRepoRoot.Repo=%q", repo.RepoRoot.Repo)
+		}
 		out += fmt.Sprintf("\tRemote=%q", repo.VcsLocal.Remote)
 		out += fmt.Sprintf("\tLocalRev=%q", repo.VcsLocal.LocalRev)
 		out += fmt.Sprintf("\tRemoteRev=%q", repo.VcsRemote.RemoteRev)
