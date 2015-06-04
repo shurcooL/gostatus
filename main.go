@@ -51,7 +51,6 @@ Legend:
   # - Remote path doesn't match import path
   $ - Stash exists
 `)
-	os.Exit(2)
 }
 
 func main() {
