@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"runtime"
 	"sync"
 
 	"github.com/kisielk/gotool"
@@ -54,8 +53,6 @@ Legend:
 }
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-
 	flag.Usage = usage
 	flag.Parse()
 
