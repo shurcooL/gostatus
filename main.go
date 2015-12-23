@@ -2,24 +2,24 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"os"
-	"sync"
 
 	"github.com/kisielk/gotool"
+	"github.com/shurcooL/gostatus/pkg"
 	"github.com/shurcooL/gostatus/status"
-
-	"github.com/shurcooL/go/gists/gist7480523"
-	"github.com/shurcooL/go/gists/gist7651991"
 )
 
 const numWorkers = 8
 
-var vFlag = flag.Bool("v", false, "Verbose output: show all Go packages, not just ones with notable status.")
-var stdinFlag = flag.Bool("stdin", false, "Read the list of newline separated Go packages from stdin.")
-var plumbingFlag = flag.Bool("plumbing", false, "Give the output in an easy-to-parse format for scripts.")
-var debugFlag = flag.Bool("debug", false, "Give the output with verbose debug information.")
+var (
+	vFlag        = flag.Bool("v", false, "Verbose output: show all Go packages, not just ones with notable status.")
+	stdinFlag    = flag.Bool("stdin", false, "Read the list of newline separated Go packages from stdin.")
+	plumbingFlag = flag.Bool("plumbing", false, "Give the output in an easy-to-parse format for scripts.")
+	debugFlag    = flag.Bool("debug", false, "Give the output with verbose debug information.")
+)
 
 func init() {
 	flag.BoolVar(&status.FFlag, "f", false, "Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.")
@@ -56,82 +56,47 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	// Get current directory.
-	wd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-
-	shouldShow := func(goPackage *gist7480523.GoPackage) bool {
+	shouldShow := func(goPackage *pkg.Repo) bool {
 		// Check for notable status.
 		return status.PorcelainPresenter(goPackage)[:4] != "    "
 	}
 	if *vFlag == true {
-		shouldShow = func(_ *gist7480523.GoPackage) bool { return true }
+		shouldShow = func(*pkg.Repo) bool { return true }
 	}
 
-	var presenter gist7480523.GoPackageStringer = status.PorcelainPresenter
+	var presenter pkg.RepoStringer = status.PorcelainPresenter
 	if *debugFlag == true {
 		presenter = status.DebugPresenter
 	} else if *plumbingFlag == true {
-		presenter = status.PlumbingPresenter
+		//presenter = status.PlumbingPresenter
 	}
 
-	// A set of repos that have been checked, to avoid doing same repo more than once.
-	var lock sync.Mutex
-	checkedRepos := map[string]struct{}{}
+	workspace := NewGoWorkspace(shouldShow, presenter)
 
-	// Input: Go package Import Path
-	// Output: If a valid Go package and not inside GOROOT, output a status string, else nil.
-	reduceFunc := func(in string) interface{} {
-		goPackage, err := gist7480523.GoPackageFromPath(in, wd)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "can't load package: %s\n", err)
-			return nil
-		}
-		if goPackage == nil {
-			return nil
-		}
-		if goPackage.Bpkg.Goroot {
-			return nil
-		}
-
-		goPackage.UpdateVcs()
-		// Check that the same repo hasn't already been done.
-		if goPackage.Dir.Repo != nil {
-			rootPath := goPackage.Dir.Repo.Vcs.RootPath()
-			lock.Lock()
-			if _, ok := checkedRepos[rootPath]; !ok {
-				checkedRepos[rootPath] = struct{}{}
-				lock.Unlock()
-			} else {
-				lock.Unlock()
-				// Skip repos that were done.
-				return nil
-			}
-		}
-
-		goPackage.UpdateVcsFields()
-
-		if shouldShow(goPackage) == false {
-			return nil
-		}
-		return presenter(goPackage)
-	}
-
-	// Run reduceFunc on all import paths in parallel.
-	var outChan <-chan interface{}
 	switch *stdinFlag {
 	case false:
-		importPathPatterns := flag.Args()
-		importPaths := gotool.ImportPaths(importPathPatterns)
-		outChan = gist7651991.GoReduceLinesFromSlice(importPaths, numWorkers, reduceFunc)
+		go func() { // This needs to happen in the background because sending input will be blocked on processing and receiving output.
+			importPathPatterns := flag.Args()
+			importPaths := gotool.ImportPaths(importPathPatterns)
+			for _, importPath := range importPaths {
+				workspace.Add(importPath)
+			}
+			workspace.Done()
+		}()
 	case true:
-		outChan = gist7651991.GoReduceLinesFromReader(os.Stdin, numWorkers, reduceFunc)
+		go func() { // This needs to happen in the background because sending input will be blocked on processing and receiving output.
+			br := bufio.NewReader(os.Stdin)
+			for line, err := br.ReadString('\n'); err == nil; line, err = br.ReadString('\n') {
+				importPath := line[:len(line)-1] // Trim last newline.
+				workspace.Add(importPath)
+			}
+			workspace.Done()
+		}()
 	}
 
 	// Output results.
-	for out := range outChan {
-		fmt.Println(out.(string))
+	for repoStatus := range workspace.Out {
+		// DONE: Consider running presenter concurrently if it's slow and saving result, similar to repo.Presenter, etc.
+		fmt.Println(repoStatus)
 	}
 }
