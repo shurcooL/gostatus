@@ -77,9 +77,9 @@ func main() {
 		presenter = status.PlumbingPresenter
 	}
 
-	// A map of repos that have been checked, to avoid doing same repo more than once.
+	// A set of repos that have been checked, to avoid doing same repo more than once.
 	var lock sync.Mutex
-	checkedRepos := map[string]bool{}
+	checkedRepos := map[string]struct{}{}
 
 	// Input: Go package Import Path
 	// Output: If a valid Go package and not inside GOROOT, output a status string, else nil.
@@ -101,8 +101,8 @@ func main() {
 		if goPackage.Dir.Repo != nil {
 			rootPath := goPackage.Dir.Repo.Vcs.RootPath()
 			lock.Lock()
-			if !checkedRepos[rootPath] {
-				checkedRepos[rootPath] = true
+			if _, ok := checkedRepos[rootPath]; !ok {
+				checkedRepos[rootPath] = struct{}{}
 				lock.Unlock()
 			} else {
 				lock.Unlock()
