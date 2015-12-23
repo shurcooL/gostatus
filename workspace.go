@@ -90,7 +90,7 @@ func (u *goWorkspace) phase12Worker() {
 		//started := time.Now()
 		// Determine repo root and local revision.
 		// This is potentially somewhat slow.
-		bpkg, err := build.Import(importPath, "", build.FindOnly)
+		bpkg, err := build.Import(importPath, wd, build.FindOnly)
 		if err != nil {
 			log.Println("build.Import:", err)
 			continue
