@@ -8,65 +8,62 @@ import (
 	"github.com/bradfitz/iter"
 	vcs2 "github.com/shurcooL/go/vcs"
 	"github.com/shurcooL/gostatus/pkg"
+	"golang.org/x/tools/go/vcs"
 )
 
-// goWorkspace is a workspace environment, meaning each repo has local and remote components.
-type goWorkspace struct {
-	shouldShow func(*pkg.Repo) bool
+// workspace is a Go workspace environment; each repo has local and remote components.
+type workspace struct {
+	shouldShow pkg.RepoFilter
 	presenter  pkg.RepoStringer
 
 	reposMu sync.Mutex
 	repos   map[string]*pkg.Repo // Map key is repoRoot.
 
-	in  chan string
-	wg1 sync.WaitGroup
-
+	in     chan string
 	phase2 chan *pkg.Repo
-	wg2    sync.WaitGroup
-
-	phase3 chan *pkg.Repo
-	wg3    sync.WaitGroup
-
-	// Out is the output of processed repos (complete with local and remote revisions).
-	Out chan string
+	phase3 chan *pkg.Repo // Output is processed repos (complete with local and remote information), filtered with shouldShow.
+	Out    chan string    // Out contains results of running presenter on processed repos.
 }
 
-func NewGoWorkspace(shouldShow func(*pkg.Repo) bool, presenter pkg.RepoStringer) *goWorkspace {
-	u := &goWorkspace{
+func NewWorkspace(shouldShow pkg.RepoFilter, presenter pkg.RepoStringer) *workspace {
+	u := &workspace{
 		shouldShow: shouldShow,
 		presenter:  presenter,
 
-		repos:  make(map[string]*pkg.Repo),
+		repos: make(map[string]*pkg.Repo),
+
 		in:     make(chan string, 64),
 		phase2: make(chan *pkg.Repo, 64),
 		phase3: make(chan *pkg.Repo, 64),
 		Out:    make(chan string, 64),
 	}
 
-	for range iter.N(numWorkers) {
-		u.wg1.Add(1)
-		go u.phase12Worker()
+	var wg1, wg2, wg3 sync.WaitGroup
+
+	for range iter.N(parallelism) {
+		wg1.Add(1)
+		go u.phase12Worker(&wg1)
 	}
 	go func() {
-		u.wg1.Wait()
+		wg1.Wait()
 		close(u.phase2)
 	}()
 
-	for range iter.N(numWorkers) {
-		u.wg2.Add(1)
-		go u.phase23Worker()
+	for range iter.N(parallelism) {
+		wg2.Add(1)
+		go u.phase23Worker(&wg2)
 	}
 	go func() {
-		u.wg2.Wait()
+		wg2.Wait()
 		close(u.phase3)
 	}()
 
-	for range iter.N(numWorkers) {
-		u.wg3.Add(1)
-		go u.phase34Worker()
+	for range iter.N(parallelism) {
+		wg3.Add(1)
+		go u.phase34Worker(&wg3)
 	}
 	go func() {
-		u.wg3.Wait()
+		wg3.Wait()
 		close(u.Out)
 	}()
 
@@ -74,18 +71,18 @@ func NewGoWorkspace(shouldShow func(*pkg.Repo) bool, presenter pkg.RepoStringer)
 }
 
 // Add adds a package with specified import path for processing.
-func (u *goWorkspace) Add(importPath string) {
+func (u *workspace) Add(importPath string) {
 	u.in <- importPath
 }
 
 // Done should be called after the workspace is finished being populated.
-func (u *goWorkspace) Done() {
+func (u *workspace) Done() {
 	close(u.in)
 }
 
 // worker for phase 1, sends unique repos to phase 2.
-func (u *goWorkspace) phase12Worker() {
-	defer u.wg1.Done()
+func (u *workspace) phase12Worker(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for importPath := range u.in {
 		//started := time.Now()
 		// Determine repo root and local revision.
@@ -95,7 +92,6 @@ func (u *goWorkspace) phase12Worker() {
 			log.Println("build.Import:", err)
 			continue
 		}
-		//goon.DumpExpr(bpkg)
 		if bpkg.Goroot {
 			continue
 		}
@@ -130,8 +126,8 @@ func (u *goWorkspace) phase12Worker() {
 }
 
 // Phase 2 to 3 figures out repo local and remote information.
-func (u *goWorkspace) phase23Worker() {
-	defer u.wg2.Done()
+func (u *workspace) phase23Worker(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for p := range u.phase2 {
 		//started := time.Now()
 		// Determine remote revision.
@@ -141,17 +137,17 @@ func (u *goWorkspace) phase23Worker() {
 		remoteRevision := remoteVCS.GetRemoteRev()
 		//fmt.Printf("remoteVCS.GetRemoteRev: %v ms.\n", time.Since(started).Seconds()*1000)
 
-		p.Remote = pkg.Remote{
-			Revision: remoteRevision,
+		p.Remote.Revision = remoteRevision
+
+		if rr, err := vcs.RepoRootForImportPath(p.Root, false); err == nil {
+			p.Remote.RepoURL = rr.Repo
 		}
 
 		// TODO: Organize.
-		p.Local = pkg.Local{
-			Revision: localVCS.GetLocalRev(),
-		}
+		p.Local.Revision = localVCS.GetLocalRev()
 
 		// TODO: Organize.
-		p.RemoteURL = localVCS.GetRemote()
+		p.Local.RemoteURL = localVCS.GetRemote()
 
 		// TODO: Organize.
 		if remoteRevision != "" {
@@ -173,8 +169,8 @@ func (u *goWorkspace) phase23Worker() {
 }
 
 // Phase 3 to 4 ...
-func (u *goWorkspace) phase34Worker() {
-	defer u.wg3.Done()
+func (u *workspace) phase34Worker(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for repo := range u.phase3 {
 		u.Out <- u.presenter(repo)
 	}

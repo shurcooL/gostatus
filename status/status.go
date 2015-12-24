@@ -37,7 +37,7 @@ var PlumbingPresenterV3 pkg.RepoStringer = func(repo *pkg.Repo) string {
 		}
 		if repo.Remote.Revision == "" {
 			out += "!"
-		} else if !FFlag && (false /*repo.RepoRoot == nil || repo.RepoRoot.Repo != repo.VcsLocal.Remote*/) {
+		} else if !FFlag && (repo.Local.RemoteURL != repo.Remote.RepoURL) {
 			out += "#"
 		} else if repo.Local.Revision != repo.Remote.Revision {
 			if !repo.Remote.IsContained {
@@ -70,20 +70,16 @@ var PlumbingPresenterV3 pkg.RepoStringer = func(repo *pkg.Repo) string {
 var DebugPresenter pkg.RepoStringer = func(repo *pkg.Repo) string {
 	out := ""
 
-	//out += fmt.Sprintf("\tRootPath=%q", repo.Vcs.RootPath())
+	out += fmt.Sprintf("\tRootPath=%q", repo.VCS.RootPath())
 	out += fmt.Sprintf("\tRoot=%q", repo.Root)
 	out += fmt.Sprintf("\tLocalBranch=%q", repo.Local.LocalBranch)
 	out += fmt.Sprintf("\tDefaultBranch=%q", repo.VCS.GetDefaultBranch())
 	out += fmt.Sprintf("\tStatus=%q", repo.Local.Status)
 	out += fmt.Sprintf("\tStash=%q", repo.Local.Stash)
-	/*if repo.RepoRoot == nil {
-		out += fmt.Sprintf("\tRepoRoot=<nil>")
-	} else {
-		out += fmt.Sprintf("\tRepoRoot.Repo=%q", repo.RepoRoot.Repo)
-	}*/
-	out += fmt.Sprintf("\tRemoteURL=%q", repo.RemoteURL)
+	out += fmt.Sprintf("\tRemote.RepoURL=%q", repo.Remote.RepoURL)
+	out += fmt.Sprintf("\tLocal.RemoteURL=%q", repo.Local.RemoteURL)
 	out += fmt.Sprintf("\tLocal.Revision=%q", repo.Local.Revision)
-	out += fmt.Sprintf("\tRemote.Revision=%q", repo.Remote.Revision)
+	out += fmt.Sprintf("\tRemoteURL=%q", repo.Local.RemoteURL)
 	out += fmt.Sprintf("\tIsContained=%v", repo.Remote.IsContained)
 
 	return out

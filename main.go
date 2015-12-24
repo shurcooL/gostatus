@@ -1,4 +1,4 @@
-// gostatus is a command line tool that shows the status of (many) Go packages.
+// gostatus is a command line tool that shows the status of Go repositories.
 package main
 
 import (
@@ -13,13 +13,13 @@ import (
 	"github.com/shurcooL/gostatus/status"
 )
 
-const numWorkers = 8
+// parallelism for workers.
+const parallelism = 8
 
 var (
-	vFlag        = flag.Bool("v", false, "Verbose output: show all Go packages, not just ones with notable status.")
-	stdinFlag    = flag.Bool("stdin", false, "Read the list of newline separated Go packages from stdin.")
-	plumbingFlag = flag.Bool("plumbing", false, "Give the output in an easy-to-parse format for scripts.")
-	debugFlag    = flag.Bool("debug", false, "Give the output with verbose debug information.")
+	vFlag     = flag.Bool("v", false, "Verbose output: show all Go packages, not just ones with notable status.")
+	stdinFlag = flag.Bool("stdin", false, "Read the list of newline separated Go packages from stdin.")
+	debugFlag = flag.Bool("debug", false, "Give the output with verbose debug information.")
 )
 
 func init() {
@@ -66,22 +66,26 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	shouldShow := func(goPackage *pkg.Repo) bool {
-		// Check for notable status.
-		return status.PorcelainPresenter(goPackage)[:4] != "    "
-	}
-	if *vFlag == true {
+	var shouldShow pkg.RepoFilter
+	switch {
+	default:
+		shouldShow = func(repo *pkg.Repo) bool {
+			// Check for notable status.
+			return status.PorcelainPresenter(repo)[:4] != "    "
+		}
+	case *vFlag:
 		shouldShow = func(*pkg.Repo) bool { return true }
 	}
 
-	var presenter pkg.RepoStringer = status.PorcelainPresenter
-	if *debugFlag == true {
+	var presenter pkg.RepoStringer
+	switch {
+	default:
+		presenter = status.PorcelainPresenter
+	case *debugFlag:
 		presenter = status.DebugPresenter
-	} else if *plumbingFlag == true {
-		//presenter = status.PlumbingPresenter
 	}
 
-	workspace := NewGoWorkspace(shouldShow, presenter)
+	workspace := NewWorkspace(shouldShow, presenter)
 
 	switch *stdinFlag {
 	case false:
@@ -105,8 +109,7 @@ func main() {
 	}
 
 	// Output results.
-	for repoStatus := range workspace.Out {
-		// DONE: Consider running presenter concurrently if it's slow and saving result, similar to repo.Presenter, etc.
-		fmt.Println(repoStatus)
+	for status := range workspace.Out {
+		fmt.Println(status)
 	}
 }
