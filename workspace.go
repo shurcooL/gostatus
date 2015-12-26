@@ -136,33 +136,31 @@ func (u *workspace) phase23Worker(wg *sync.WaitGroup) {
 		//started := time.Now()
 		// Determine remote revision.
 		// This is slow because it requires a network operation.
-		var remoteVCS vcs2.Remote = p.VCS
-		var localVCS vcs2.Vcs = p.VCS
-		remoteRevision := remoteVCS.GetRemoteRev()
+		remoteRevision := p.VCS.GetRemoteRev()
 		//fmt.Printf("remoteVCS.GetRemoteRev: %v ms.\n", time.Since(started).Seconds()*1000)
 
+		// TODO: Organize all of this better.
 		p.Remote.Revision = remoteRevision
 
 		if rr, err := vcs.RepoRootForImportPath(p.Root, false); err == nil {
 			p.Remote.RepoURL = rr.Repo
 		}
 
-		// TODO: Organize.
-		p.Local.Revision = localVCS.GetLocalRev()
+		p.Local.Revision = p.VCS.GetLocalRev()
 
 		// TODO: Organize.
-		p.Local.RemoteURL = localVCS.GetRemote()
+		p.Local.RemoteURL = p.VCS.GetRemote()
 
 		// TODO: Organize.
 		if remoteRevision != "" {
-			p.Remote.IsContained = localVCS.IsContained(remoteRevision)
+			p.Remote.IsContained = p.VCS.IsContained(remoteRevision)
 		}
 
 		// TODO: Organize and maybe do at a later stage, after checking shouldShow?
 		//       Actually, probably need this for shouldShow, etc.
-		p.Local.Status = localVCS.GetStatus()
-		p.Local.Stash = localVCS.GetStash()
-		p.Local.LocalBranch = localVCS.GetLocalBranch()
+		p.Local.Status = p.VCS.GetStatus()
+		p.Local.Stash = p.VCS.GetStash()
+		p.Local.LocalBranch = p.VCS.GetLocalBranch()
 
 		if !u.shouldShow(p) {
 			continue
