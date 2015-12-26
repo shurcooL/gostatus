@@ -1,8 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"go/build"
 	"log"
+	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/bradfitz/iter"
@@ -101,18 +105,18 @@ func (u *workspace) phase12Worker(wg *sync.WaitGroup) {
 			log.Println("not in VCS:", bpkg.Dir)
 			continue
 		}
-		repoRoot := vcs2.RootPath()[len(bpkg.SrcRoot)+1:] // TODO: Consider sym links, etc.
+		root := repoRoot(vcs2.RootPath(), bpkg.SrcRoot)
 		//fmt.Printf("build + vcs: %v ms.\n", time.Since(started).Seconds()*1000)
 
 		var repo *pkg.Repo
 		u.reposMu.Lock()
-		if _, ok := u.repos[repoRoot]; !ok {
+		if _, ok := u.repos[root]; !ok {
 			repo = &pkg.Repo{
-				Root: repoRoot,
+				Root: root,
 				VCS:  vcs2,
 				// TODO: Maybe keep track of import paths inside, etc.
 			}
-			u.repos[repoRoot] = repo
+			u.repos[root] = repo
 		} else {
 			// TODO: Maybe keep track of import paths inside, etc.
 		}
@@ -174,4 +178,30 @@ func (u *workspace) phase34Worker(wg *sync.WaitGroup) {
 	for repo := range u.phase3 {
 		u.Out <- u.presenter(repo)
 	}
+}
+
+// repoRoot figures out the repo root import path given repoPath and srcRoot.
+// It handles symlinks that may be involved in the paths.
+// It also handles a possible case mismatch in the prefix, printing a warning to stderr if detected.
+func repoRoot(repoPath, srcRoot string) string {
+	if s, err := filepath.EvalSymlinks(repoPath); err == nil {
+		repoPath = s
+	} else {
+		fmt.Fprintln(os.Stderr, "warning: repoRoot: can't resolve symlink:", err)
+	}
+	if s, err := filepath.EvalSymlinks(srcRoot); err == nil {
+		srcRoot = s
+	} else {
+		fmt.Fprintln(os.Stderr, "warning: repoRoot: can't resolve symlink:", err)
+	}
+
+	sep := string(filepath.Separator)
+
+	// Detect and handle case mismatch in prefix.
+	if prefixLen := len(srcRoot + sep); len(repoPath) >= prefixLen && srcRoot+sep != repoPath[:prefixLen] && strings.EqualFold(srcRoot+sep, repoPath[:prefixLen]) {
+		fmt.Fprintln(os.Stderr, "warning: repoRoot: prefix case doesn't match:", srcRoot+sep, repoPath[:prefixLen])
+		return filepath.ToSlash(repoPath[prefixLen:])
+	}
+
+	return filepath.ToSlash(strings.TrimPrefix(repoPath, srcRoot+sep))
 }
