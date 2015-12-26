@@ -1,30 +1,20 @@
-package status
+package main
 
-import (
-	"fmt"
+import "fmt"
 
-	"github.com/shurcooL/gostatus/pkg"
-)
+// RepoFilter is a repo filter.
+type RepoFilter func(repo *Repo) (show bool)
 
-// PorcelainPresenter is a simple porcelain presenter of GoPackage to humans.
+// RepoPresenter is a repo presenter.
+type RepoPresenter func(repo *Repo) string
+
+// PorcelainPresenter is a simple porcelain repo presenter to humans.
 //
 // It currently is, and must remain read-only and safe for concurrent execution.
-var PorcelainPresenter pkg.RepoStringer = PlumbingPresenterV3
-
-// Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.
-var FFlag bool
-
-// This format should remain stable across versions and regardless of user configuration.
-//
-// It currently is, and must remain read-only and safe for concurrent execution.
-var PlumbingPresenterV3 pkg.RepoStringer = func(repo *pkg.Repo) string {
+var PorcelainPresenter RepoPresenter = func(repo *Repo) string {
 	out := ""
 
 	if repo != nil {
-		// TODO: Take care of symlinks?
-		//repoImportPath := gist7480523.GetRepoImportPath(repo.Vcs.RootPath(), goPackage.Bpkg.SrcRoot)
-		repoImportPath := repo.Root
-
 		if repo.Local.LocalBranch != repo.VCS.GetDefaultBranch() {
 			out += "b"
 		} else {
@@ -37,7 +27,7 @@ var PlumbingPresenterV3 pkg.RepoStringer = func(repo *pkg.Repo) string {
 		}
 		if repo.Remote.Revision == "" {
 			out += "!"
-		} else if !FFlag && (repo.Local.RemoteURL != repo.Remote.RepoURL) {
+		} else if !*fFlag && (repo.Local.RemoteURL != repo.Remote.RepoURL) {
 			out += "#"
 		} else if repo.Local.Revision != repo.Remote.Revision {
 			if !repo.Remote.IsContained {
@@ -54,7 +44,7 @@ var PlumbingPresenterV3 pkg.RepoStringer = func(repo *pkg.Repo) string {
 			out += " "
 		}
 
-		out += " " + repoImportPath + "/..."
+		out += " " + repo.Root + "/..."
 	} else {
 		out += "????"
 
@@ -64,10 +54,10 @@ var PlumbingPresenterV3 pkg.RepoStringer = func(repo *pkg.Repo) string {
 	return out
 }
 
-// DebugPresenter gives debug output.
+// DebugPresenter produces debug output.
 //
 // It currently is, and must remain read-only and safe for concurrent execution.
-var DebugPresenter pkg.RepoStringer = func(repo *pkg.Repo) string {
+var DebugPresenter RepoPresenter = func(repo *Repo) string {
 	out := ""
 
 	out += fmt.Sprintf("\tRootPath=%q", repo.VCS.RootPath())

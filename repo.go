@@ -1,4 +1,4 @@
-package pkg
+package main
 
 import vcs "github.com/shurcooL/go/vcs"
 
@@ -30,7 +30,3 @@ type Remote struct {
 	Revision    string
 	IsContained bool // True if remote commit is contained in the default local branch.
 }
-
-type RepoFilter func(repo *Repo) (show bool)
-
-type RepoStringer func(repo *Repo) string

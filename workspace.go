@@ -10,35 +10,34 @@ import (
 	"sync"
 
 	"github.com/bradfitz/iter"
-	vcs2 "github.com/shurcooL/go/vcs"
-	"github.com/shurcooL/gostatus/pkg"
-	"golang.org/x/tools/go/vcs"
+	shvcs "github.com/shurcooL/go/vcs"
+	govcs "golang.org/x/tools/go/vcs"
 )
 
 // workspace is a Go workspace environment; each repo has local and remote components.
 type workspace struct {
-	shouldShow pkg.RepoFilter
-	presenter  pkg.RepoStringer
+	shouldShow RepoFilter
+	presenter  RepoPresenter
 
 	reposMu sync.Mutex
-	repos   map[string]*pkg.Repo // Map key is repoRoot.
+	repos   map[string]*Repo // Map key is repoRoot.
 
 	in     chan string
-	phase2 chan *pkg.Repo
-	phase3 chan *pkg.Repo // Output is processed repos (complete with local and remote information), filtered with shouldShow.
-	Out    chan string    // Out contains results of running presenter on processed repos.
+	phase2 chan *Repo
+	phase3 chan *Repo  // Output is processed repos (complete with local and remote information), filtered with shouldShow.
+	Out    chan string // Out contains results of running presenter on processed repos.
 }
 
-func NewWorkspace(shouldShow pkg.RepoFilter, presenter pkg.RepoStringer) *workspace {
+func NewWorkspace(shouldShow RepoFilter, presenter RepoPresenter) *workspace {
 	u := &workspace{
 		shouldShow: shouldShow,
 		presenter:  presenter,
 
-		repos: make(map[string]*pkg.Repo),
+		repos: make(map[string]*Repo),
 
 		in:     make(chan string, 64),
-		phase2: make(chan *pkg.Repo, 64),
-		phase3: make(chan *pkg.Repo, 64),
+		phase2: make(chan *Repo, 64),
+		phase3: make(chan *Repo, 64),
 		Out:    make(chan string, 64),
 	}
 
@@ -99,21 +98,21 @@ func (u *workspace) phase12Worker(wg *sync.WaitGroup) {
 		if bpkg.Goroot {
 			continue
 		}
-		vcs2 := vcs2.New(bpkg.Dir)
-		if vcs2 == nil {
+		shvcs := shvcs.New(bpkg.Dir)
+		if shvcs == nil {
 			// TODO: Include for "????" output in gostatus.
 			log.Println("not in VCS:", bpkg.Dir)
 			continue
 		}
-		root := repoRoot(vcs2.RootPath(), bpkg.SrcRoot)
+		root := repoRoot(shvcs.RootPath(), bpkg.SrcRoot)
 		//fmt.Printf("build + vcs: %v ms.\n", time.Since(started).Seconds()*1000)
 
-		var repo *pkg.Repo
+		var repo *Repo
 		u.reposMu.Lock()
 		if _, ok := u.repos[root]; !ok {
-			repo = &pkg.Repo{
+			repo = &Repo{
 				Root: root,
-				VCS:  vcs2,
+				VCS:  shvcs,
 				// TODO: Maybe keep track of import paths inside, etc.
 			}
 			u.repos[root] = repo
@@ -142,7 +141,7 @@ func (u *workspace) phase23Worker(wg *sync.WaitGroup) {
 		// TODO: Organize all of this better.
 		p.Remote.Revision = remoteRevision
 
-		if rr, err := vcs.RepoRootForImportPath(p.Root, false); err == nil {
+		if rr, err := govcs.RepoRootForImportPath(p.Root, false); err == nil {
 			p.Remote.RepoURL = rr.Repo
 		}
 

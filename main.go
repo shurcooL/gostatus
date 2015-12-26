@@ -9,22 +9,17 @@ import (
 	"os"
 
 	"github.com/kisielk/gotool"
-	"github.com/shurcooL/gostatus/pkg"
-	"github.com/shurcooL/gostatus/status"
 )
 
 // parallelism for workers.
 const parallelism = 8
 
 var (
-	vFlag     = flag.Bool("v", false, "Verbose output: show all Go packages, not just ones with notable status.")
 	stdinFlag = flag.Bool("stdin", false, "Read the list of newline separated Go packages from stdin.")
+	fFlag     = flag.Bool("f", false, "Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.")
+	vFlag     = flag.Bool("v", false, "Verbose mode. Show all Go packages, not just ones with notable status.")
 	debugFlag = flag.Bool("debug", false, "Give the output with verbose debug information.")
 )
-
-func init() {
-	flag.BoolVar(&status.FFlag, "f", false, "Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.")
-}
 
 var wd = func() string {
 	// Get current directory.
@@ -66,23 +61,23 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	var shouldShow pkg.RepoFilter
+	var shouldShow RepoFilter
 	switch {
 	default:
-		shouldShow = func(repo *pkg.Repo) bool {
+		shouldShow = func(repo *Repo) bool {
 			// Check for notable status.
-			return status.PorcelainPresenter(repo)[:4] != "    "
+			return PorcelainPresenter(repo)[:4] != "    "
 		}
 	case *vFlag:
-		shouldShow = func(*pkg.Repo) bool { return true }
+		shouldShow = func(*Repo) bool { return true }
 	}
 
-	var presenter pkg.RepoStringer
+	var presenter RepoPresenter
 	switch {
 	default:
-		presenter = status.PorcelainPresenter
+		presenter = PorcelainPresenter
 	case *debugFlag:
-		presenter = status.DebugPresenter
+		presenter = DebugPresenter
 	}
 
 	workspace := NewWorkspace(shouldShow, presenter)
