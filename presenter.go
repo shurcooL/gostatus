@@ -3,74 +3,72 @@ package main
 import "fmt"
 
 // RepoFilter is a repo filter.
-type RepoFilter func(repo *Repo) (show bool)
+type RepoFilter func(r *Repo) (show bool)
 
 // RepoPresenter is a repo presenter.
-type RepoPresenter func(repo *Repo) string
+type RepoPresenter func(r *Repo) string
 
 // PorcelainPresenter is a simple porcelain repo presenter to humans.
 //
 // It currently is, and must remain read-only and safe for concurrent execution.
-var PorcelainPresenter RepoPresenter = func(repo *Repo) string {
-	out := ""
+var PorcelainPresenter RepoPresenter = func(r *Repo) string {
+	var s string
 
-	if repo != nil {
-		if repo.Local.LocalBranch != repo.VCS.GetDefaultBranch() {
-			out += "b"
+	if r != nil {
+		if r.Local.Branch != r.VCS.DefaultBranch() {
+			s += "b"
 		} else {
-			out += " "
+			s += " "
 		}
-		if repo.Local.Status != "" {
-			out += "*"
+		if r.Local.Status != "" {
+			s += "*"
 		} else {
-			out += " "
+			s += " "
 		}
-		if repo.Remote.Revision == "" {
-			out += "!"
-		} else if !*fFlag && (repo.Local.RemoteURL != repo.Remote.RepoURL) {
-			out += "#"
-		} else if repo.Local.Revision != repo.Remote.Revision {
-			if !repo.Remote.IsContained {
-				out += "+"
+		if r.Remote.Revision == "" {
+			s += "!"
+		} else if !*fFlag && (r.Local.RemoteURL != r.Remote.RepoURL) {
+			s += "#"
+		} else if r.Local.Revision != r.Remote.Revision {
+			if !r.LocalContainsRemoteRevision {
+				s += "+"
 			} else {
-				out += "-"
+				s += "-"
 			}
 		} else {
-			out += " "
+			s += " "
 		}
-		if repo.Local.Stash != "" {
-			out += "$"
+		if r.Local.Stash != "" {
+			s += "$"
 		} else {
-			out += " "
+			s += " "
 		}
 
-		out += " " + repo.Root + "/..."
+		s += " " + r.Root + "/..."
 	} else {
-		out += "????"
+		s += "????"
 
-		out += " " + "<goPackage.Bpkg.ImportPath>" // TODO.
+		s += " " + "<goPackage.Bpkg.ImportPath>" // TODO.
 	}
 
-	return out
+	return s
 }
 
 // DebugPresenter produces debug output.
 //
 // It currently is, and must remain read-only and safe for concurrent execution.
-var DebugPresenter RepoPresenter = func(repo *Repo) string {
-	out := ""
-
-	out += fmt.Sprintf("\tRootPath=%q", repo.VCS.RootPath())
-	out += fmt.Sprintf("\tRoot=%q", repo.Root)
-	out += fmt.Sprintf("\tLocalBranch=%q", repo.Local.LocalBranch)
-	out += fmt.Sprintf("\tDefaultBranch=%q", repo.VCS.GetDefaultBranch())
-	out += fmt.Sprintf("\tStatus=%q", repo.Local.Status)
-	out += fmt.Sprintf("\tStash=%q", repo.Local.Stash)
-	out += fmt.Sprintf("\tRemote.RepoURL=%q", repo.Remote.RepoURL)
-	out += fmt.Sprintf("\tLocal.RemoteURL=%q", repo.Local.RemoteURL)
-	out += fmt.Sprintf("\tLocal.Revision=%q", repo.Local.Revision)
-	out += fmt.Sprintf("\tRemoteURL=%q", repo.Local.RemoteURL)
-	out += fmt.Sprintf("\tIsContained=%v", repo.Remote.IsContained)
-
-	return out
+var DebugPresenter RepoPresenter = func(r *Repo) string {
+	var s string
+	s += fmt.Sprintf("Path=%q", r.Path)
+	s += fmt.Sprintf("\tRoot=%q", r.Root)
+	s += fmt.Sprintf("\tDefaultBranch=%q", r.VCS.DefaultBranch())
+	s += fmt.Sprintf("\tLocal.Status=%q", r.Local.Status)
+	s += fmt.Sprintf("\tLocal.Branch=%q", r.Local.Branch)
+	s += fmt.Sprintf("\tLocal.Revision=%q", r.Local.Revision)
+	s += fmt.Sprintf("\tLocal.Stash=%q", r.Local.Stash)
+	s += fmt.Sprintf("\tLocal.RemoteURL=%q", r.Local.RemoteURL)
+	s += fmt.Sprintf("\tRemote.RepoURL=%q", r.Remote.RepoURL)
+	s += fmt.Sprintf("\tRemote.Revision=%q", r.Remote.Revision)
+	s += fmt.Sprintf("\tLocalContainsRemoteRevision=%v", r.LocalContainsRemoteRevision)
+	return s
 }

@@ -64,9 +64,9 @@ func main() {
 	var shouldShow RepoFilter
 	switch {
 	default:
-		shouldShow = func(repo *Repo) bool {
+		shouldShow = func(r *Repo) bool {
 			// Check for notable status.
-			return PorcelainPresenter(repo)[:4] != "    "
+			return PorcelainPresenter(r)[:4] != "    "
 		}
 	case *vFlag:
 		shouldShow = func(*Repo) bool { return true }

@@ -1,17 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"go/build"
 	"log"
-	"os"
-	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/bradfitz/iter"
-	shvcs "github.com/shurcooL/go/vcs"
-	govcs "golang.org/x/tools/go/vcs"
+	"github.com/shurcooL/vcsstate"
+	"golang.org/x/tools/go/vcs"
 )
 
 // workspace is a Go workspace environment; each repo has local and remote components.
@@ -29,7 +25,7 @@ type workspace struct {
 }
 
 func NewWorkspace(shouldShow RepoFilter, presenter RepoPresenter) *workspace {
-	u := &workspace{
+	w := &workspace{
 		shouldShow: shouldShow,
 		presenter:  presenter,
 
@@ -41,53 +37,57 @@ func NewWorkspace(shouldShow RepoFilter, presenter RepoPresenter) *workspace {
 		Out:    make(chan string, 64),
 	}
 
-	var wg1, wg2, wg3 sync.WaitGroup
-
-	for range iter.N(parallelism) {
-		wg1.Add(1)
-		go u.phase12Worker(&wg1)
+	{
+		var wg sync.WaitGroup
+		for range iter.N(parallelism) {
+			wg.Add(1)
+			go w.phase12Worker(&wg)
+		}
+		go func() {
+			wg.Wait()
+			close(w.phase2)
+		}()
 	}
-	go func() {
-		wg1.Wait()
-		close(u.phase2)
-	}()
-
-	for range iter.N(parallelism) {
-		wg2.Add(1)
-		go u.phase23Worker(&wg2)
+	{
+		var wg sync.WaitGroup
+		for range iter.N(parallelism) {
+			wg.Add(1)
+			go w.phase23Worker(&wg)
+		}
+		go func() {
+			wg.Wait()
+			close(w.phase3)
+		}()
 	}
-	go func() {
-		wg2.Wait()
-		close(u.phase3)
-	}()
-
-	for range iter.N(parallelism) {
-		wg3.Add(1)
-		go u.phase34Worker(&wg3)
+	{
+		var wg sync.WaitGroup
+		for range iter.N(parallelism) {
+			wg.Add(1)
+			go w.phase34Worker(&wg)
+		}
+		go func() {
+			wg.Wait()
+			close(w.Out)
+		}()
 	}
-	go func() {
-		wg3.Wait()
-		close(u.Out)
-	}()
 
-	return u
+	return w
 }
 
 // Add adds a package with specified import path for processing.
-func (u *workspace) Add(importPath string) {
-	u.in <- importPath
+func (w *workspace) Add(importPath string) {
+	w.in <- importPath
 }
 
 // Done should be called after the workspace is finished being populated.
-func (u *workspace) Done() {
-	close(u.in)
+func (w *workspace) Done() {
+	close(w.in)
 }
 
 // worker for phase 1, sends unique repos to phase 2.
-func (u *workspace) phase12Worker(wg *sync.WaitGroup) {
+func (w *workspace) phase12Worker(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for importPath := range u.in {
-		//started := time.Now()
+	for importPath := range w.in {
 		// Determine repo root and local revision.
 		// This is potentially somewhat slow.
 		bpkg, err := build.Import(importPath, wd, build.FindOnly)
@@ -98,107 +98,84 @@ func (u *workspace) phase12Worker(wg *sync.WaitGroup) {
 		if bpkg.Goroot {
 			continue
 		}
-		shvcs := shvcs.New(bpkg.Dir)
-		if shvcs == nil {
+		vcs, root, err := vcs.FromDir(bpkg.Dir, bpkg.SrcRoot)
+		if err != nil {
 			// TODO: Include for "????" output in gostatus.
 			log.Println("not in VCS:", bpkg.Dir)
 			continue
 		}
-		root := repoRoot(shvcs.RootPath(), bpkg.SrcRoot)
-		//fmt.Printf("build + vcs: %v ms.\n", time.Since(started).Seconds()*1000)
+		vcsstate, err := vcsstate.NewVCS(vcs)
+		if err != nil {
+			// TODO: Include for "????" output in gostatus.
+			log.Println("repo not supported by vcsstate:", err)
+			continue
+		}
 
 		var repo *Repo
-		u.reposMu.Lock()
-		if _, ok := u.repos[root]; !ok {
+		w.reposMu.Lock()
+		if _, ok := w.repos[root]; !ok {
 			repo = &Repo{
+				Path: bpkg.Dir,
 				Root: root,
-				VCS:  shvcs,
+				VCS:  vcsstate,
 				// TODO: Maybe keep track of import paths inside, etc.
 			}
-			u.repos[root] = repo
+			w.repos[root] = repo
 		} else {
 			// TODO: Maybe keep track of import paths inside, etc.
 		}
-		u.reposMu.Unlock()
+		w.reposMu.Unlock()
 
 		// If new repo, send off to phase 2 channel.
 		if repo != nil {
-			u.phase2 <- repo
+			w.phase2 <- repo
 		}
 	}
 }
 
 // Phase 2 to 3 figures out repo local and remote information.
-func (u *workspace) phase23Worker(wg *sync.WaitGroup) {
+func (w *workspace) phase23Worker(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for p := range u.phase2 {
-		//started := time.Now()
-		// Determine remote revision.
-		// This is slow because it requires a network operation.
-		remoteRevision := p.VCS.GetRemoteRev()
-		//fmt.Printf("remoteVCS.GetRemoteRev: %v ms.\n", time.Since(started).Seconds()*1000)
-
-		// TODO: Organize all of this better.
-		p.Remote.Revision = remoteRevision
-
-		if rr, err := govcs.RepoRootForImportPath(p.Root, false); err == nil {
-			p.Remote.RepoURL = rr.Repo
+	for repo := range w.phase2 {
+		if s, err := repo.VCS.Status(repo.Path); err == nil {
+			repo.Local.Status = s
+		}
+		if b, err := repo.VCS.Branch(repo.Path); err == nil {
+			repo.Local.Branch = b
+		}
+		if r, err := repo.VCS.LocalRevision(repo.Path); err == nil {
+			repo.Local.Revision = r
+		}
+		if s, err := repo.VCS.Stash(repo.Path); err == nil {
+			repo.Local.Stash = s
+		}
+		if r, err := repo.VCS.RemoteURL(repo.Path); err == nil {
+			repo.Local.RemoteURL = r
+		}
+		if r, err := repo.VCS.RemoteRevision(repo.Path); err == nil {
+			repo.Remote.Revision = r
+		}
+		if repo.Remote.Revision != "" {
+			if c, err := repo.VCS.Contains(repo.Path, repo.Remote.Revision); err == nil {
+				repo.LocalContainsRemoteRevision = c
+			}
+		}
+		if rr, err := vcs.RepoRootForImportPath(repo.Root, false); err == nil {
+			repo.Remote.RepoURL = rr.Repo
 		}
 
-		p.Local.Revision = p.VCS.GetLocalRev()
-
-		// TODO: Organize.
-		p.Local.RemoteURL = p.VCS.GetRemote()
-
-		// TODO: Organize.
-		if remoteRevision != "" {
-			p.Remote.IsContained = p.VCS.IsContained(remoteRevision)
-		}
-
-		// TODO: Organize and maybe do at a later stage, after checking shouldShow?
-		//       Actually, probably need this for shouldShow, etc.
-		p.Local.Status = p.VCS.GetStatus()
-		p.Local.Stash = p.VCS.GetStash()
-		p.Local.LocalBranch = p.VCS.GetLocalBranch()
-
-		if !u.shouldShow(p) {
+		if !w.shouldShow(repo) {
 			continue
 		}
 
-		u.phase3 <- p
+		w.phase3 <- repo
 	}
 }
 
 // Phase 3 to 4 ...
-func (u *workspace) phase34Worker(wg *sync.WaitGroup) {
+func (w *workspace) phase34Worker(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for repo := range u.phase3 {
-		u.Out <- u.presenter(repo)
+	for repo := range w.phase3 {
+		w.Out <- w.presenter(repo)
 	}
-}
-
-// repoRoot figures out the repo root import path given repoPath and srcRoot.
-// It handles symlinks that may be involved in the paths.
-// It also handles a possible case mismatch in the prefix, printing a warning to stderr if detected.
-func repoRoot(repoPath, srcRoot string) string {
-	if s, err := filepath.EvalSymlinks(repoPath); err == nil {
-		repoPath = s
-	} else {
-		fmt.Fprintln(os.Stderr, "warning: repoRoot: can't resolve symlink:", err)
-	}
-	if s, err := filepath.EvalSymlinks(srcRoot); err == nil {
-		srcRoot = s
-	} else {
-		fmt.Fprintln(os.Stderr, "warning: repoRoot: can't resolve symlink:", err)
-	}
-
-	sep := string(filepath.Separator)
-
-	// Detect and handle case mismatch in prefix.
-	if prefixLen := len(srcRoot + sep); len(repoPath) >= prefixLen && srcRoot+sep != repoPath[:prefixLen] && strings.EqualFold(srcRoot+sep, repoPath[:prefixLen]) {
-		fmt.Fprintln(os.Stderr, "warning: repoRoot: prefix case doesn't match:", srcRoot+sep, repoPath[:prefixLen])
-		return filepath.ToSlash(repoPath[prefixLen:])
-	}
-
-	return filepath.ToSlash(strings.TrimPrefix(repoPath, srcRoot+sep))
 }

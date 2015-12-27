@@ -1,32 +1,31 @@
 package main
 
-import vcs "github.com/shurcooL/go/vcs"
+import "github.com/shurcooL/vcsstate"
 
+// Repo represents a repository that contains Go packages, and its state.
 type Repo struct {
+	// Path is the local filesystem path to the repository.
+	Path string
+
 	// Root is the import path corresponding to the root of the repository.
 	Root string
 
-	VCS vcs.Vcs
+	VCS vcsstate.VCS
 
-	Local  Local
-	Remote Remote
-}
+	Local struct {
+		// RemoteURL is the remote URL, including scheme.
+		RemoteURL string
 
-type Local struct {
-	// RemoteURL is the remote URL, including scheme.
-	RemoteURL string
+		Status   string
+		Branch   string // Checked out branch.
+		Revision string
+		Stash    string
+	}
+	Remote struct {
+		// RepoURL is the repository URL, including scheme, as determined dynamically from the import path.
+		RepoURL string
 
-	Revision string
-
-	Status      string
-	Stash       string
-	LocalBranch string
-}
-
-type Remote struct {
-	// RepoURL is the repository URL, including scheme, as determined from the import path.
-	RepoURL string
-
-	Revision    string
-	IsContained bool // True if remote commit is contained in the default local branch.
+		Revision string
+	}
+	LocalContainsRemoteRevision bool
 }
