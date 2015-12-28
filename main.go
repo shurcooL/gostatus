@@ -105,7 +105,20 @@ func main() {
 	}
 
 	// Output results.
-	for status := range workspace.Statuses {
-		fmt.Println(status)
+	for workspace.Statuses != nil || workspace.Errors != nil {
+		select {
+		case status, ok := <-workspace.Statuses:
+			if !ok {
+				workspace.Statuses = nil
+				continue
+			}
+			fmt.Println(status)
+		case error, ok := <-workspace.Errors:
+			if !ok {
+				workspace.Errors = nil
+				continue
+			}
+			fmt.Fprintln(os.Stderr, error)
+		}
 	}
 }

@@ -2,14 +2,16 @@ package main
 
 import "github.com/shurcooL/vcsstate"
 
-// Repo represents a repository that contains Go packages, and its state.
+// Repo represents a repository that contains Go packages and its state when VCS is non-nil.
+// It represents a Go package that is not under a VCS when VCS is nil.
 type Repo struct {
-	// Path is the local filesystem path to the repository.
+	// Path is the local filesystem path to the repository or Go package.
 	Path string
 
-	// Root is the import path corresponding to the root of the repository.
+	// Root is the import path corresponding to the root of the repository or Go package.
 	Root string
 
+	// VCS allows getting the state of the VCS. It's nil if there's no VCS.
 	VCS vcsstate.VCS
 
 	Local struct {
