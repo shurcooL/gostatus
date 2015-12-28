@@ -15,22 +15,23 @@ Usage
 
 ```bash
 Usage: gostatus [flags] [packages]
-       [newline separated packages] | gostatus --stdin [flags]
-  -debug=false: Give the output with verbose debug information.
-  -f=false: Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.
-  -plumbing=false: Give the output in an easy-to-parse format for scripts.
-  -stdin=false: Read the list of newline separated Go packages from stdin.
-  -v=false: Verbose output: show all Go packages, not just ones with notable status.
+       [newline separated packages] | gostatus -stdin [flags]
+  -debug
+    	Give the output with verbose debug information.
+  -f	Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.
+  -stdin
+    	Read the list of newline separated Go packages from stdin.
+  -v	Verbose mode. Show all Go packages, not just ones with notable status.
 
 Examples:
-  # Show status of package in current directory, if notable.
-  gostatus .
-
-  # Show status of all packages with notable status.
+  # Show status of all packages.
   gostatus all
 
-  # Show status of all dependencies (recursive) of package in cur working dir.
-  go list -f '{{join .Deps "\n"}}' . | gostatus --stdin -v
+  # Show status of package in current directory.
+  gostatus
+
+  # Show status of all dependencies (recursive) of package in current dir.
+  go list -f '{{join .Deps "\n"}}' . | gostatus -stdin -v
 
 Legend:
   ???? - Not under (recognized) version control
@@ -47,20 +48,20 @@ Examples
 --------
 
 ```bash
-# Show status of all your packages
+# Show status of all packages.
 $ gostatus all
 
-# Show status of package in current directory
-$ gostatus .
+# Show status of package in current directory.
+$ gostatus
 
-# Show status of specified package
-$ gostatus some/import/path
+# Show status of specified package.
+$ gostatus import/path
 
-# Show status of all dependencies (recursive) of package in current working dir
-$ go list -f '{{join .Deps "\n"}}' . | gostatus --stdin -v
+# Show status of all dependencies (recursive) of package in current dir.
+$ go list -f '{{join .Deps "\n"}}' . | gostatus -stdin -v
 
-# Show status of all dependencies (recursive) of specified package
-$ go list -f '{{join .Deps "\n"}}' some/import/path | gostatus --stdin -v
+# Show status of all dependencies (recursive) of specified package.
+$ go list -f '{{join .Deps "\n"}}' import/path | gostatus -stdin -v
 ```
 
 Sample Output

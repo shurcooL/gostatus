@@ -32,18 +32,18 @@ var wd = func() string {
 
 func usage() {
 	fmt.Fprint(os.Stderr, "Usage: gostatus [flags] [packages]\n")
-	fmt.Fprint(os.Stderr, "       [newline separated packages] | gostatus --stdin [flags]\n")
+	fmt.Fprint(os.Stderr, "       [newline separated packages] | gostatus -stdin [flags]\n")
 	flag.PrintDefaults()
 	fmt.Fprint(os.Stderr, `
 Examples:
-  # Show status of package in current directory, if notable.
-  gostatus .
-
-  # Show status of all packages with notable status.
+  # Show status of all packages.
   gostatus all
 
-  # Show status of all dependencies (recursive) of package in cur working dir.
-  go list -f '{{join .Deps "\n"}}' . | gostatus --stdin -v
+  # Show status of package in current directory.
+  gostatus
+
+  # Show status of all dependencies (recursive) of package in current dir.
+  go list -f '{{join .Deps "\n"}}' . | gostatus -stdin -v
 
 Legend:
   ???? - Not under (recognized) version control
