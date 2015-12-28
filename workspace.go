@@ -12,82 +12,72 @@ import (
 
 // workspace is a Go workspace environment; each repo has local and remote components.
 type workspace struct {
+	ImportPaths       chan string // ImportPaths is the input for Go packages to be processed.
+	unique            chan *Repo  // unique repos.
+	processedFiltered chan *Repo  // processed repos, populated with local and remote info, filtered with shouldShow.
+	Statuses          chan string // Statuses has results of running presenter on processed repos.
+
 	shouldShow RepoFilter
 	presenter  RepoPresenter
 
 	reposMu sync.Mutex
 	repos   map[string]*Repo // Map key is repoRoot.
-
-	in     chan string
-	phase2 chan *Repo
-	phase3 chan *Repo  // Output is processed repos (complete with local and remote information), filtered with shouldShow.
-	Out    chan string // Out contains results of running presenter on processed repos.
 }
 
 func NewWorkspace(shouldShow RepoFilter, presenter RepoPresenter) *workspace {
 	w := &workspace{
+		ImportPaths:       make(chan string, 64),
+		unique:            make(chan *Repo, 64),
+		processedFiltered: make(chan *Repo, 64),
+		Statuses:          make(chan string, 64),
+
 		shouldShow: shouldShow,
 		presenter:  presenter,
 
 		repos: make(map[string]*Repo),
-
-		in:     make(chan string, 64),
-		phase2: make(chan *Repo, 64),
-		phase3: make(chan *Repo, 64),
-		Out:    make(chan string, 64),
 	}
 
 	{
 		var wg sync.WaitGroup
 		for range iter.N(parallelism) {
 			wg.Add(1)
-			go w.phase12Worker(&wg)
+			go w.uniqueWorker(&wg)
 		}
 		go func() {
 			wg.Wait()
-			close(w.phase2)
+			close(w.unique)
 		}()
 	}
 	{
 		var wg sync.WaitGroup
 		for range iter.N(parallelism) {
 			wg.Add(1)
-			go w.phase23Worker(&wg)
+			go w.processFilterWorker(&wg)
 		}
 		go func() {
 			wg.Wait()
-			close(w.phase3)
+			close(w.processedFiltered)
 		}()
 	}
 	{
 		var wg sync.WaitGroup
 		for range iter.N(parallelism) {
 			wg.Add(1)
-			go w.phase34Worker(&wg)
+			go w.presenterWorker(&wg)
 		}
 		go func() {
 			wg.Wait()
-			close(w.Out)
+			close(w.Statuses)
 		}()
 	}
 
 	return w
 }
 
-// Add adds a package with specified import path for processing.
-func (w *workspace) Add(importPath string) {
-	w.in <- importPath
-}
-
-// Done should be called after the workspace is finished being populated.
-func (w *workspace) Done() {
-	close(w.in)
-}
-
-// worker for phase 1, sends unique repos to phase 2.
-func (w *workspace) phase12Worker(wg *sync.WaitGroup) {
+// uniqueWorker finds unique repos out of all input Go packages.
+func (w *workspace) uniqueWorker(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for importPath := range w.in {
+	for importPath := range w.ImportPaths {
 		// Determine repo root and local revision.
 		// This is potentially somewhat slow.
 		bpkg, err := build.Import(importPath, wd, build.FindOnly)
@@ -128,15 +118,15 @@ func (w *workspace) phase12Worker(wg *sync.WaitGroup) {
 
 		// If new repo, send off to phase 2 channel.
 		if repo != nil {
-			w.phase2 <- repo
+			w.unique <- repo
 		}
 	}
 }
 
-// Phase 2 to 3 figures out repo local and remote information.
-func (w *workspace) phase23Worker(wg *sync.WaitGroup) {
+// processFilterWorker figures out repo local and remote info, and filters with shouldShow.
+func (w *workspace) processFilterWorker(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for repo := range w.phase2 {
+	for repo := range w.unique {
 		if s, err := repo.VCS.Status(repo.Path); err == nil {
 			repo.Local.Status = s
 		}
@@ -168,14 +158,14 @@ func (w *workspace) phase23Worker(wg *sync.WaitGroup) {
 			continue
 		}
 
-		w.phase3 <- repo
+		w.processedFiltered <- repo
 	}
 }
 
-// Phase 3 to 4 ...
-func (w *workspace) phase34Worker(wg *sync.WaitGroup) {
+// presenterWorker runs presenter on processed and filtered repos.
+func (w *workspace) presenterWorker(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for repo := range w.phase3 {
-		w.Out <- w.presenter(repo)
+	for repo := range w.processedFiltered {
+		w.Statuses <- w.presenter(repo)
 	}
 }

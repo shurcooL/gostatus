@@ -82,29 +82,30 @@ func main() {
 
 	workspace := NewWorkspace(shouldShow, presenter)
 
+	// Feed input into workspace processing pipeline.
 	switch *stdinFlag {
 	case false:
 		go func() { // This needs to happen in the background because sending input will be blocked on processing and receiving output.
 			importPathPatterns := flag.Args()
 			importPaths := gotool.ImportPaths(importPathPatterns)
 			for _, importPath := range importPaths {
-				workspace.Add(importPath)
+				workspace.ImportPaths <- importPath
 			}
-			workspace.Done()
+			close(workspace.ImportPaths)
 		}()
 	case true:
 		go func() { // This needs to happen in the background because sending input will be blocked on processing and receiving output.
 			br := bufio.NewReader(os.Stdin)
 			for line, err := br.ReadString('\n'); err == nil; line, err = br.ReadString('\n') {
 				importPath := line[:len(line)-1] // Trim last newline.
-				workspace.Add(importPath)
+				workspace.ImportPaths <- importPath
 			}
-			workspace.Done()
+			close(workspace.ImportPaths)
 		}()
 	}
 
 	// Output results.
-	for status := range workspace.Out {
+	for status := range workspace.Statuses {
 		fmt.Println(status)
 	}
 }
