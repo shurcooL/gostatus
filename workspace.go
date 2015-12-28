@@ -13,8 +13,8 @@ import (
 // workspace is a Go workspace environment; each repo has local and remote components.
 type workspace struct {
 	ImportPaths       chan string // ImportPaths is the input for Go packages to be processed.
-	unique            chan *Repo  // unique repos.
-	processedFiltered chan *Repo  // processed repos, populated with local and remote info, filtered with shouldShow.
+	unique            chan *Repo  // Unique repos.
+	processedFiltered chan *Repo  // Processed repos, populated with local and remote state, filtered with shouldShow.
 	Statuses          chan string // Statuses has results of running presenter on processed repos.
 	Errors            chan error  // Errors contains errors that were encountered during processing of repos.
 
@@ -22,7 +22,7 @@ type workspace struct {
 	presenter  RepoPresenter
 
 	reposMu sync.Mutex
-	repos   map[string]*Repo // Map key is repoRoot.
+	repos   map[string]*Repo // Map key is the import path corresponding to the root of the repository or Go package.
 }
 
 func NewWorkspace(shouldShow RepoFilter, presenter RepoPresenter) *workspace {
@@ -138,7 +138,7 @@ func (w *workspace) uniqueWorker(wg *sync.WaitGroup) {
 	}
 }
 
-// processFilterWorker figures out repo local and remote info, and filters with shouldShow.
+// processFilterWorker computes repository local and remote state, and filters with shouldShow.
 func (w *workspace) processFilterWorker(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for repo := range w.unique {
