@@ -1,7 +1,7 @@
 gostatus [![Build Status](https://travis-ci.org/shurcooL/gostatus.svg?branch=master)](https://travis-ci.org/shurcooL/gostatus)
 ========
 
-gostatus is a command line tool that shows the status of (many) Go packages.
+gostatus is a command line tool that shows the status of Go repositories.
 
 Installation
 ------------

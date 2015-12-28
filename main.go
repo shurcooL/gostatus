@@ -1,29 +1,34 @@
-// gostatus is a command line tool that shows the status of (many) Go packages.
+// gostatus is a command line tool that shows the status of Go repositories.
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
+	"log"
 	"os"
-	"sync"
 
 	"github.com/kisielk/gotool"
-	"github.com/shurcooL/gostatus/status"
-
-	"github.com/shurcooL/go/gists/gist7480523"
-	"github.com/shurcooL/go/gists/gist7651991"
 )
 
-const numWorkers = 8
+// parallelism for workers.
+const parallelism = 8
 
-var vFlag = flag.Bool("v", false, "Verbose output: show all Go packages, not just ones with notable status.")
-var stdinFlag = flag.Bool("stdin", false, "Read the list of newline separated Go packages from stdin.")
-var plumbingFlag = flag.Bool("plumbing", false, "Give the output in an easy-to-parse format for scripts.")
-var debugFlag = flag.Bool("debug", false, "Give the output with verbose debug information.")
+var (
+	stdinFlag = flag.Bool("stdin", false, "Read the list of newline separated Go packages from stdin.")
+	fFlag     = flag.Bool("f", false, "Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.")
+	vFlag     = flag.Bool("v", false, "Verbose mode. Show all Go packages, not just ones with notable status.")
+	debugFlag = flag.Bool("debug", false, "Give the output with verbose debug information.")
+)
 
-func init() {
-	flag.BoolVar(&status.FFlag, "f", false, "Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.")
-}
+var wd = func() string {
+	// Get current directory.
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln("failed to get current directory:", err)
+	}
+	return wd
+}()
 
 func usage() {
 	fmt.Fprint(os.Stderr, "Usage: gostatus [flags] [packages]\n")
@@ -56,82 +61,64 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	// Get current directory.
-	wd, err := os.Getwd()
-	if err != nil {
-		panic(err)
+	var shouldShow RepoFilter
+	switch {
+	default:
+		shouldShow = func(r *Repo) bool {
+			// Check for notable status.
+			return PorcelainPresenter(r)[:4] != "    "
+		}
+	case *vFlag:
+		shouldShow = func(*Repo) bool { return true }
 	}
 
-	shouldShow := func(goPackage *gist7480523.GoPackage) bool {
-		// Check for notable status.
-		return status.PorcelainPresenter(goPackage)[:4] != "    "
-	}
-	if *vFlag == true {
-		shouldShow = func(_ *gist7480523.GoPackage) bool { return true }
-	}
-
-	var presenter gist7480523.GoPackageStringer = status.PorcelainPresenter
-	if *debugFlag == true {
-		presenter = status.DebugPresenter
-	} else if *plumbingFlag == true {
-		presenter = status.PlumbingPresenter
+	var presenter RepoPresenter
+	switch {
+	default:
+		presenter = PorcelainPresenter
+	case *debugFlag:
+		presenter = DebugPresenter
 	}
 
-	// A set of repos that have been checked, to avoid doing same repo more than once.
-	var lock sync.Mutex
-	checkedRepos := map[string]struct{}{}
+	workspace := NewWorkspace(shouldShow, presenter)
 
-	// Input: Go package Import Path
-	// Output: If a valid Go package and not inside GOROOT, output a status string, else nil.
-	reduceFunc := func(in string) interface{} {
-		goPackage, err := gist7480523.GoPackageFromPath(in, wd)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "can't load package: %s\n", err)
-			return nil
-		}
-		if goPackage == nil {
-			return nil
-		}
-		if goPackage.Bpkg.Goroot {
-			return nil
-		}
-
-		goPackage.UpdateVcs()
-		// Check that the same repo hasn't already been done.
-		if goPackage.Dir.Repo != nil {
-			rootPath := goPackage.Dir.Repo.Vcs.RootPath()
-			lock.Lock()
-			if _, ok := checkedRepos[rootPath]; !ok {
-				checkedRepos[rootPath] = struct{}{}
-				lock.Unlock()
-			} else {
-				lock.Unlock()
-				// Skip repos that were done.
-				return nil
-			}
-		}
-
-		goPackage.UpdateVcsFields()
-
-		if shouldShow(goPackage) == false {
-			return nil
-		}
-		return presenter(goPackage)
-	}
-
-	// Run reduceFunc on all import paths in parallel.
-	var outChan <-chan interface{}
+	// Feed input into workspace processing pipeline.
 	switch *stdinFlag {
 	case false:
-		importPathPatterns := flag.Args()
-		importPaths := gotool.ImportPaths(importPathPatterns)
-		outChan = gist7651991.GoReduceLinesFromSlice(importPaths, numWorkers, reduceFunc)
+		go func() { // This needs to happen in the background because sending input will be blocked on processing and receiving output.
+			importPathPatterns := flag.Args()
+			importPaths := gotool.ImportPaths(importPathPatterns)
+			for _, importPath := range importPaths {
+				workspace.ImportPaths <- importPath
+			}
+			close(workspace.ImportPaths)
+		}()
 	case true:
-		outChan = gist7651991.GoReduceLinesFromReader(os.Stdin, numWorkers, reduceFunc)
+		go func() { // This needs to happen in the background because sending input will be blocked on processing and receiving output.
+			br := bufio.NewReader(os.Stdin)
+			for line, err := br.ReadString('\n'); err == nil; line, err = br.ReadString('\n') {
+				importPath := line[:len(line)-1] // Trim last newline.
+				workspace.ImportPaths <- importPath
+			}
+			close(workspace.ImportPaths)
+		}()
 	}
 
 	// Output results.
-	for out := range outChan {
-		fmt.Println(out.(string))
+	for workspace.Statuses != nil || workspace.Errors != nil {
+		select {
+		case status, ok := <-workspace.Statuses:
+			if !ok {
+				workspace.Statuses = nil
+				continue
+			}
+			fmt.Println(status)
+		case error, ok := <-workspace.Errors:
+			if !ok {
+				workspace.Errors = nil
+				continue
+			}
+			fmt.Fprintln(os.Stderr, error)
+		}
 	}
 }
