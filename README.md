@@ -17,7 +17,7 @@ Usage
 Usage: gostatus [flags] [packages]
        [newline separated packages] | gostatus -stdin [flags]
   -debug
-    	Give the output with verbose debug information.
+    	Cause the repository data to be printed in verbose debug format.
   -f	Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.
   -stdin
     	Read the list of newline separated Go packages from stdin.

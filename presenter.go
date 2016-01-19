@@ -1,6 +1,6 @@
 package main
 
-import "fmt"
+import "encoding/json"
 
 // RepoFilter is a repo filter.
 type RepoFilter func(r *Repo) (show bool)
@@ -49,23 +49,13 @@ var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 	return s
 }
 
-// DebugPresenter produces debug output.
+// DebugPresenter produces verbose debug output.
 var DebugPresenter RepoPresenter = func(r *Repo) string {
-	var s string
-	s += fmt.Sprintf("Path=%q", r.Path)
-	s += fmt.Sprintf("\tRoot=%q", r.Root)
-	if r.VCS == nil {
-		s += fmt.Sprintf("\tVCS=%v", r.VCS)
-		return s
+	b, err := json.MarshalIndent(r, "", "\t")
+	if err != nil {
+		// json.Marshal should never fail to marshal the given struct. If it does, it's a bug
+		// in the program and should be fixed.
+		panic(err)
 	}
-	s += fmt.Sprintf("\tDefaultBranch=%q", r.VCS.DefaultBranch())
-	s += fmt.Sprintf("\tLocal.Status=%q", r.Local.Status)
-	s += fmt.Sprintf("\tLocal.Branch=%q", r.Local.Branch)
-	s += fmt.Sprintf("\tLocal.Revision=%q", r.Local.Revision)
-	s += fmt.Sprintf("\tLocal.Stash=%q", r.Local.Stash)
-	s += fmt.Sprintf("\tLocal.RemoteURL=%q", r.Local.RemoteURL)
-	s += fmt.Sprintf("\tRemote.RepoURL=%q", r.Remote.RepoURL)
-	s += fmt.Sprintf("\tRemote.Revision=%q", r.Remote.Revision)
-	s += fmt.Sprintf("\tLocalContainsRemoteRevision=%v", r.LocalContainsRemoteRevision)
-	return s
+	return string(b)
 }

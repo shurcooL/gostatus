@@ -15,10 +15,10 @@ import (
 const parallelism = 8
 
 var (
-	stdinFlag = flag.Bool("stdin", false, "Read the list of newline separated Go packages from stdin.")
+	debugFlag = flag.Bool("debug", false, "Cause the repository data to be printed in verbose debug format.")
 	fFlag     = flag.Bool("f", false, "Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.")
+	stdinFlag = flag.Bool("stdin", false, "Read the list of newline separated Go packages from stdin.")
 	vFlag     = flag.Bool("v", false, "Verbose mode. Show all Go packages, not just ones with notable status.")
-	debugFlag = flag.Bool("debug", false, "Give the output with verbose debug information.")
 )
 
 var wd = func() string {
@@ -74,10 +74,10 @@ func main() {
 
 	var presenter RepoPresenter
 	switch {
-	default:
-		presenter = PorcelainPresenter
 	case *debugFlag:
 		presenter = DebugPresenter
+	default:
+		presenter = PorcelainPresenter
 	}
 
 	workspace := NewWorkspace(shouldShow, presenter)
