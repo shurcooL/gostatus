@@ -6,19 +6,18 @@ import "fmt"
 type RepoFilter func(r *Repo) (show bool)
 
 // RepoPresenter is a repo presenter.
+// All implementations must be read-only and safe for concurrent execution.
 type RepoPresenter func(r *Repo) string
 
 // PorcelainPresenter is a simple porcelain repo presenter to humans.
-//
-// It currently is, and must remain read-only and safe for concurrent execution.
 var PorcelainPresenter RepoPresenter = func(r *Repo) string {
-	if r.VCS == nil {
+	if r.vcs == nil {
 		// Go package not under VCS.
 		return "????" + " " + r.Root
 	}
 
 	var s string
-	if r.Local.Branch != r.VCS.DefaultBranch() {
+	if r.Local.Branch != r.DefaultBranch {
 		s += "b"
 	} else {
 		s += " "
@@ -51,8 +50,6 @@ var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 }
 
 // DebugPresenter produces debug output.
-//
-// It currently is, and must remain read-only and safe for concurrent execution.
 var DebugPresenter RepoPresenter = func(r *Repo) string {
 	var s string
 	s += fmt.Sprintf("Path=%q", r.Path)

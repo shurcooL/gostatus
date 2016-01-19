@@ -101,7 +101,7 @@ func (w *workspace) uniqueWorker(wg *sync.WaitGroup) {
 				pkg = &Repo{
 					Path: bpkg.Dir,
 					Root: bpkg.ImportPath,
-					VCS:  nil,
+					vcs:  nil,
 				}
 				w.repos[bpkg.ImportPath] = pkg
 			}
@@ -125,7 +125,7 @@ func (w *workspace) uniqueWorker(wg *sync.WaitGroup) {
 			repo = &Repo{
 				Path: bpkg.Dir,
 				Root: root,
-				VCS:  vcs,
+				vcs:  vcs,
 			}
 			w.repos[root] = repo
 		}
@@ -153,31 +153,32 @@ func (w *workspace) processFilterWorker(wg *sync.WaitGroup) {
 }
 
 func (*workspace) computeVCSState(r *Repo) {
-	if r.VCS == nil {
+	if r.vcs == nil {
 		// Go package not under VCS.
 		return
 	}
 
-	if s, err := r.VCS.Status(r.Path); err == nil {
+	r.DefaultBranch = r.vcs.DefaultBranch()
+	if s, err := r.vcs.Status(r.Path); err == nil {
 		r.Local.Status = s
 	}
-	if b, err := r.VCS.Branch(r.Path); err == nil {
+	if b, err := r.vcs.Branch(r.Path); err == nil {
 		r.Local.Branch = b
 	}
-	if rev, err := r.VCS.LocalRevision(r.Path); err == nil {
+	if rev, err := r.vcs.LocalRevision(r.Path); err == nil {
 		r.Local.Revision = rev
 	}
-	if s, err := r.VCS.Stash(r.Path); err == nil {
+	if s, err := r.vcs.Stash(r.Path); err == nil {
 		r.Local.Stash = s
 	}
-	if remote, err := r.VCS.RemoteURL(r.Path); err == nil {
+	if remote, err := r.vcs.RemoteURL(r.Path); err == nil {
 		r.Local.RemoteURL = remote
 	}
-	if rev, err := r.VCS.RemoteRevision(r.Path); err == nil {
+	if rev, err := r.vcs.RemoteRevision(r.Path); err == nil {
 		r.Remote.Revision = rev
 	}
 	if r.Remote.Revision != "" {
-		if c, err := r.VCS.Contains(r.Path, r.Remote.Revision); err == nil {
+		if c, err := r.vcs.Contains(r.Path, r.Remote.Revision); err == nil {
 			r.LocalContainsRemoteRevision = c
 		}
 	}

@@ -11,10 +11,11 @@ type Repo struct {
 	// Root is the import path corresponding to the root of the repository or Go package.
 	Root string
 
-	// VCS allows getting the state of the VCS. It's nil if there's no VCS.
-	VCS vcsstate.VCS
+	// vcs allows getting the state of the VCS. It's nil if there's no VCS.
+	vcs vcsstate.VCS
 
-	Local struct {
+	DefaultBranch string
+	Local         struct {
 		// RemoteURL is the remote URL, including scheme.
 		RemoteURL string
 
