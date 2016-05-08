@@ -17,7 +17,7 @@ var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 	}
 
 	var s string
-	if r.Local.Branch != r.DefaultBranch {
+	if r.Local.Branch != r.Remote.Branch {
 		s += "b"
 	} else {
 		s += " "

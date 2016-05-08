@@ -14,8 +14,7 @@ type Repo struct {
 	// vcs allows getting the state of the VCS. It's nil if there's no VCS.
 	vcs vcsstate.VCS
 
-	DefaultBranch string
-	Local         struct {
+	Local struct {
 		// RemoteURL is the remote URL, including scheme.
 		RemoteURL string
 
@@ -28,6 +27,7 @@ type Repo struct {
 		// RepoURL is the repository URL, including scheme, as determined dynamically from the import path.
 		RepoURL string
 
+		Branch   string // Default branch, as determined from remote.
 		Revision string
 	}
 	LocalContainsRemoteRevision bool

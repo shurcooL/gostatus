@@ -158,15 +158,11 @@ func (*workspace) computeVCSState(r *Repo) {
 		return
 	}
 
-	r.DefaultBranch = r.vcs.DefaultBranch()
 	if s, err := r.vcs.Status(r.Path); err == nil {
 		r.Local.Status = s
 	}
 	if b, err := r.vcs.Branch(r.Path); err == nil {
 		r.Local.Branch = b
-	}
-	if rev, err := r.vcs.LocalRevision(r.Path); err == nil {
-		r.Local.Revision = rev
 	}
 	if s, err := r.vcs.Stash(r.Path); err == nil {
 		r.Local.Stash = s
@@ -174,11 +170,15 @@ func (*workspace) computeVCSState(r *Repo) {
 	if remote, err := r.vcs.RemoteURL(r.Path); err == nil {
 		r.Local.RemoteURL = remote
 	}
-	if rev, err := r.vcs.RemoteRevision(r.Path); err == nil {
+	if b, rev, err := r.vcs.RemoteBranchAndRevision(r.Path); err == nil {
+		r.Remote.Branch = b
 		r.Remote.Revision = rev
 	}
+	if rev, err := r.vcs.LocalRevision(r.Path, r.Remote.Branch); err == nil {
+		r.Local.Revision = rev
+	}
 	if r.Remote.Revision != "" {
-		if c, err := r.vcs.Contains(r.Path, r.Remote.Revision); err == nil {
+		if c, err := r.vcs.Contains(r.Path, r.Remote.Revision, r.Remote.Branch); err == nil {
 			r.LocalContainsRemoteRevision = c
 		}
 	}
