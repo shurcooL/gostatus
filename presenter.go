@@ -13,36 +13,72 @@ type RepoPresenter func(r *Repo) string
 var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 	if r.vcs == nil {
 		// Go package not under VCS.
-		return "????" + " " + r.Root
+		return r.Root + "\n	? Not under (recognized) version control"
+	}
+
+	s := r.Root + "/..."
+	if r.Local.Branch != r.Remote.Branch {
+		s += "\n	b Non-master branch checked out"
+	}
+	if r.Local.Status != "" {
+		s += "\n	* Uncommited changes in working dir"
+	}
+	switch {
+	case r.Remote.Revision == "":
+		s += "\n	! No remote"
+	case !*fFlag && (r.Local.RemoteURL != r.Remote.RepoURL):
+		s += "\n	# Remote path doesn't match import path"
+	case r.Local.Revision != r.Remote.Revision:
+		if !r.LocalContainsRemoteRevision {
+			s += "\n	+ Update available"
+		} else {
+			s += "\n	- Local revision is ahead of remote"
+		}
+	}
+	if r.Local.Stash != "" {
+		s += "\n	$ Stash exists"
+	}
+	return s
+}
+
+// CompactPresenter is a simple porcelain repo presenter to humans in compact form.
+var CompactPresenter RepoPresenter = func(r *Repo) string {
+	if r.vcs == nil {
+		// Go package not under VCS.
+		return "???? " + r.Root
 	}
 
 	var s string
-	if r.Local.Branch != r.Remote.Branch {
+	switch {
+	case r.Local.Branch != r.Remote.Branch:
 		s += "b"
-	} else {
+	default:
 		s += " "
 	}
-	if r.Local.Status != "" {
+	switch {
+	case r.Local.Status != "":
 		s += "*"
-	} else {
+	default:
 		s += " "
 	}
-	if r.Remote.Revision == "" {
+	switch {
+	case r.Remote.Revision == "":
 		s += "!"
-	} else if !*fFlag && (r.Local.RemoteURL != r.Remote.RepoURL) {
+	case !*fFlag && (r.Local.RemoteURL != r.Remote.RepoURL):
 		s += "#"
-	} else if r.Local.Revision != r.Remote.Revision {
+	case r.Local.Revision != r.Remote.Revision:
 		if !r.LocalContainsRemoteRevision {
 			s += "+"
 		} else {
 			s += "-"
 		}
-	} else {
+	default:
 		s += " "
 	}
-	if r.Local.Stash != "" {
+	switch {
+	case r.Local.Stash != "":
 		s += "$"
-	} else {
+	default:
 		s += " "
 	}
 	s += " " + r.Root + "/..."

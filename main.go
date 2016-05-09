@@ -15,10 +15,11 @@ import (
 const parallelism = 8
 
 var (
-	debugFlag = flag.Bool("debug", false, "Cause the repository data to be printed in verbose debug format.")
-	fFlag     = flag.Bool("f", false, "Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.")
-	stdinFlag = flag.Bool("stdin", false, "Read the list of newline separated Go packages from stdin.")
-	vFlag     = flag.Bool("v", false, "Verbose mode. Show all Go packages, not just ones with notable status.")
+	debugFlag   = flag.Bool("debug", false, "Cause the repository data to be printed in verbose debug format.")
+	fFlag       = flag.Bool("f", false, "Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.")
+	stdinFlag   = flag.Bool("stdin", false, "Read the list of newline separated Go packages from stdin.")
+	vFlag       = flag.Bool("v", false, "Verbose mode. Show all Go packages, not just ones with notable status.")
+	compactFlag = flag.Bool("c", false, "Compact output with inline notation.")
 )
 
 var wd = func() string {
@@ -46,11 +47,11 @@ Examples:
   go list -f '{{join .Deps "\n"}}' . | gostatus -stdin -v
 
 Legend:
-  ???? - Not under (recognized) version control
+  ? - Not under (recognized) version control
   b - Non-master branch checked out
   * - Uncommited changes in working dir
   + - Update available
-  - - Local revision is ahead of remote (need to push?)
+  - - Local revision is ahead of remote
   ! - No remote
   # - Remote path doesn't match import path
   $ - Stash exists
@@ -66,7 +67,7 @@ func main() {
 	default:
 		shouldShow = func(r *Repo) bool {
 			// Check for notable status.
-			return PorcelainPresenter(r)[:4] != "    "
+			return CompactPresenter(r)[:4] != "    "
 		}
 	case *vFlag:
 		shouldShow = func(*Repo) bool { return true }
@@ -76,6 +77,8 @@ func main() {
 	switch {
 	case *debugFlag:
 		presenter = DebugPresenter
+	case *compactFlag:
+		presenter = CompactPresenter
 	default:
 		presenter = PorcelainPresenter
 	}
