@@ -18,7 +18,7 @@ var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 
 	s := r.Root + "/..."
 	if r.Local.Branch != r.Remote.Branch {
-		s += "\n	b Non-master branch checked out"
+		s += "\n	b Non-default branch checked out"
 	}
 	if r.Local.Status != "" {
 		s += "\n	* Uncommited changes in working dir"

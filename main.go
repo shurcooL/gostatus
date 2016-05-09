@@ -48,7 +48,7 @@ Examples:
 
 Legend:
   ? - Not under (recognized) version control
-  b - Non-master branch checked out
+  b - Non-default branch checked out
   * - Uncommited changes in working dir
   + - Update available
   - - Local revision is ahead of remote
