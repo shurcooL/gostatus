@@ -1,6 +1,9 @@
 package main
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // RepoFilter is a repo filter.
 type RepoFilter func(r *Repo) (show bool)
@@ -27,7 +30,7 @@ var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 	case r.Remote.Revision == "":
 		s += "\n	! No remote"
 	case !*fFlag && (r.Local.RemoteURL != r.Remote.RepoURL):
-		s += "\n	# Remote path doesn't match import path"
+		s += fmt.Sprintf("\n	# Remote path (%s) doesn't match import path (%s)", r.Remote.RepoURL, r.Local.RemoteURL)
 	case r.Local.Revision != r.Remote.Revision:
 		if !r.LocalContainsRemoteRevision {
 			s += "\n	+ Update available"
