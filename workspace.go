@@ -173,6 +173,8 @@ func (*workspace) computeVCSState(r *Repo) {
 	if b, rev, err := r.vcs.RemoteBranchAndRevision(r.Path); err == nil {
 		r.Remote.Branch = b
 		r.Remote.Revision = rev
+	} else if err == vcsstate.ErrNoRemote {
+		r.Remote.Branch = r.vcs.NoRemoteDefaultBranch()
 	}
 	if rev, err := r.vcs.LocalRevision(r.Path, r.Remote.Branch); err == nil {
 		r.Local.Revision = rev
