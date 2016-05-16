@@ -13,10 +13,10 @@ type RepoPresenter func(r *Repo) string
 var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 	if r.vcs == nil {
 		// Go package not under VCS.
-		return r.Root + "\n	? Not under (recognized) version control"
+		return CompactPresenter(r) + "\n	? Not under (recognized) version control"
 	}
 
-	s := r.Root + "/..."
+	s := CompactPresenter(r)
 	if r.Local.Branch != r.Remote.Branch {
 		s += "\n	b Non-default branch checked out"
 	}
