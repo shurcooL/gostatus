@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/shurcooL/gostatus/status"
 )
 
 // RepoFilter is a repo filter.
@@ -29,7 +31,7 @@ var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 	switch {
 	case r.Remote.Revision == "":
 		s += "\n	! No remote"
-	case !*fFlag && !equalRepoURLs(r.Local.RemoteURL, r.Remote.RepoURL):
+	case !*fFlag && !status.EqualRepoURLs(r.Local.RemoteURL, r.Remote.RepoURL):
 		s += fmt.Sprintf("\n	# Remote URL (%s) doesn't match repo URL inferred from import path (%s)", r.Local.RemoteURL, r.Remote.RepoURL)
 	case r.Local.Revision != r.Remote.Revision:
 		if !r.LocalContainsRemoteRevision {
@@ -67,7 +69,7 @@ var CompactPresenter RepoPresenter = func(r *Repo) string {
 	switch {
 	case r.Remote.Revision == "":
 		s += "!"
-	case !*fFlag && !equalRepoURLs(r.Local.RemoteURL, r.Remote.RepoURL):
+	case !*fFlag && !status.EqualRepoURLs(r.Local.RemoteURL, r.Remote.RepoURL):
 		s += "#"
 	case r.Local.Revision != r.Remote.Revision:
 		if !r.LocalContainsRemoteRevision {

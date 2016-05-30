@@ -1,13 +1,16 @@
-package main
+// Package status provides a func to check if two repo URLs are equal
+// in the context of Go packages.
+package status
 
 import (
 	"net/url"
 	"regexp"
 )
 
-// equalRepoURLs reports whether two urls are equal, ignoring scheme and userinfo.
-// If there are any errors parsing the urls, it resorts to doing a string comparison.
-func equalRepoURLs(rawurl1, rawurl2 string) bool {
+// EqualRepoURLs reports whether two URLs are equal, ignoring scheme and userinfo.
+// It parses URLs with support for SCP-like syntax, like the cmd/go tool.
+// If there are any errors parsing the URLs, it resorts to doing a string comparison.
+func EqualRepoURLs(rawurl1, rawurl2 string) bool {
 	u, err := parseURL(rawurl1)
 	if err != nil {
 		return rawurl1 == rawurl2

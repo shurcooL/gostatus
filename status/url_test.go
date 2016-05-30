@@ -1,4 +1,4 @@
-package main
+package status
 
 import (
 	"reflect"
@@ -28,8 +28,8 @@ func TestEqualRepoURLs(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		if got, want := equalRepoURLs(test.rawurl1, test.rawurl2), test.want; got != want {
-			t.Errorf("equalRepoURLs(%q, %q): got %v, want %v", test.rawurl1, test.rawurl2, got, want)
+		if got, want := EqualRepoURLs(test.rawurl1, test.rawurl2), test.want; got != want {
+			t.Errorf("EqualRepoURLs(%q, %q): got %v, want %v", test.rawurl1, test.rawurl2, got, want)
 		}
 	}
 }
