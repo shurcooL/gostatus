@@ -18,12 +18,22 @@ func TestEqualRepoURLs(t *testing.T) {
 		},
 		{
 			rawurl1: "https://github.com/user/repo",
+			rawurl2: "https://github.com/user/repo.git",
+			want:    true,
+		},
+		{
+			rawurl1: "https://github.com/user/repo",
 			rawurl2: "https://github.com/user/wrongrepo",
 			want:    false,
 		},
 		{
 			rawurl1: "https://github.com/user/repo",
 			rawurl2: "git@github.com:user/repo",
+			want:    true,
+		},
+		{
+			rawurl1: "https://github.com/user/repo",
+			rawurl2: "git@github.com:user/repo.git",
 			want:    true,
 		},
 	}
@@ -45,8 +55,16 @@ func TestParseURL(t *testing.T) {
 			want: "ssh://git@github.com/user/repo",
 		},
 		{
+			in:   "git@github.com:user/repo.git",
+			want: "ssh://git@github.com/user/repo.git",
+		},
+		{
 			in:   "https://github.com/user/repo",
 			want: "https://github.com/user/repo",
+		},
+		{
+			in:   "https://github.com/user/repo.git",
+			want: "https://github.com/user/repo.git",
 		},
 	}
 	for _, test := range tests {

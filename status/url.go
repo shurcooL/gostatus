@@ -5,6 +5,7 @@ package status
 import (
 	"net/url"
 	"regexp"
+	"strings"
 )
 
 // EqualRepoURLs reports whether two URLs are equal, ignoring scheme and userinfo.
@@ -21,7 +22,7 @@ func EqualRepoURLs(rawurl1, rawurl2 string) bool {
 	}
 	u.Scheme, v.Scheme = "", "" // Ignore scheme.
 	u.User, v.User = nil, nil   // Ignore username and password information.
-	return u.String() == v.String()
+	return trimGitExt(u.String()) == trimGitExt(v.String())
 }
 
 // scpSyntaxRe matches the SCP-like addresses used by Git to access repositories by SSH.
@@ -41,4 +42,8 @@ func parseURL(rawurl string) (*url.URL, error) {
 	}
 
 	return url.Parse(rawurl)
+}
+
+func trimGitExt(url string) string {
+	return strings.TrimRight(url, ".git")
 }
