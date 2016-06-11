@@ -17,6 +17,13 @@ func TestEqualRepoURLs(t *testing.T) {
 			want:    true,
 		},
 		{
+			// .git suffix does not have special treatment, and these are not considered as equal URLs.
+			// See https://github.com/shurcooL/gostatus/issues/37#issuecomment-225336823 for rationale.
+			rawurl1: "https://github.com/user/repo",
+			rawurl2: "https://github.com/user/repo.git",
+			want:    false,
+		},
+		{
 			rawurl1: "https://github.com/user/repo",
 			rawurl2: "https://github.com/user/wrongrepo",
 			want:    false,
