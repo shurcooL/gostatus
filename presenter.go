@@ -29,8 +29,10 @@ var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 		s += "\n	* Uncommited changes in working dir"
 	}
 	switch {
-	case r.Remote.Revision == "":
+	case r.Local.RemoteURL == "":
 		s += "\n	! No remote"
+	case r.Remote.Revision == "":
+		s += "\n	? Unreachable remote (check your connection)"
 	case !*fFlag && !status.EqualRepoURLs(r.Local.RemoteURL, r.Remote.RepoURL):
 		s += fmt.Sprintf("\n	# Remote URL (%s) doesn't match repo URL inferred from import path (%s)", r.Local.RemoteURL, r.Remote.RepoURL)
 	case r.Local.Revision != r.Remote.Revision:
@@ -67,8 +69,10 @@ var CompactPresenter RepoPresenter = func(r *Repo) string {
 		s += " "
 	}
 	switch {
-	case r.Remote.Revision == "":
+	case r.Local.RemoteURL == "":
 		s += "!"
+	case r.Remote.Revision == "":
+		s += "?"
 	case !*fFlag && !status.EqualRepoURLs(r.Local.RemoteURL, r.Remote.RepoURL):
 		s += "#"
 	case r.Local.Revision != r.Remote.Revision:

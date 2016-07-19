@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/build"
+	"log"
 	"sync"
 
 	"github.com/bradfitz/iter"
@@ -170,11 +171,18 @@ func (*workspace) computeVCSState(r *Repo) {
 	if remote, err := r.vcs.RemoteURL(r.Path); err == nil {
 		r.Local.RemoteURL = remote
 	}
-	if b, rev, err := r.vcs.RemoteBranchAndRevision(r.Path); err == nil {
+	if b, rev, remoteErr := r.vcs.RemoteBranchAndRevision(r.Path); remoteErr == nil {
 		r.Remote.Branch = b
 		r.Remote.Revision = rev
-	} else if err == vcsstate.ErrNoRemote {
+	} else if remoteErr == vcsstate.ErrNoRemote {
 		r.Remote.Branch = r.vcs.NoRemoteDefaultBranch()
+	} else if remoteErr != nil {
+		if b, err := r.vcs.CachedRemoteDefaultBranch(); err == nil {
+			r.Remote.Branch = b
+		} else {
+			log.Println(remoteErr)
+			r.Remote.Branch = r.vcs.NoRemoteDefaultBranch() // It's a better fallback than empty string.
+		}
 	}
 	if rev, err := r.vcs.LocalRevision(r.Path, r.Remote.Branch); err == nil {
 		r.Local.Revision = rev
