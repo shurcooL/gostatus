@@ -89,8 +89,7 @@ func main() {
 	switch *stdinFlag {
 	case false:
 		go func() { // This needs to happen in the background because sending input will be blocked on processing and receiving output.
-			importPathPatterns := flag.Args()
-			importPaths := gotool.ImportPaths(importPathPatterns)
+			importPaths := gotool.ImportPaths(flag.Args())
 			for _, importPath := range importPaths {
 				workspace.ImportPaths <- importPath
 			}
