@@ -47,7 +47,7 @@ Examples:
   go list -f '{{join .Deps "\n"}}' . | gostatus -stdin -v
 
 Legend:
-  ? - Not under (recognized) version control or unreachable remote
+  ? - Not under version control or unreachable remote
   b - Non-default branch checked out
   * - Uncommited changes in working dir
   + - Update available

@@ -12,7 +12,8 @@ type Repo struct {
 	Root string
 
 	// vcs allows getting the state of the VCS. It's nil if there's no VCS.
-	vcs vcsstate.VCS
+	vcs      vcsstate.VCS
+	vcsError error
 
 	Local struct {
 		// RemoteURL is the remote URL, including scheme.

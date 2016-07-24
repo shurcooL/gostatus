@@ -15,13 +15,13 @@ Usage
 ```bash
 Usage: gostatus [flags] [packages]
        [newline separated packages] | gostatus -stdin [flags]
-  -c  Compact output with inline notation.
+  -c	Compact output with inline notation.
   -debug
-      Cause the repository data to be printed in verbose debug format.
-  -f  Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.
+    	Cause the repository data to be printed in verbose debug format.
+  -f	Force not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original.
   -stdin
-      Read the list of newline separated Go packages from stdin.
-  -v  Verbose mode. Show all Go packages, not just ones with notable status.
+    	Read the list of newline separated Go packages from stdin.
+  -v	Verbose mode. Show all Go packages, not just ones with notable status.
 
 Examples:
   # Show status of all packages.
@@ -34,7 +34,7 @@ Examples:
   go list -f '{{join .Deps "\n"}}' . | gostatus -stdin -v
 
 Legend:
-  ? - Not under (recognized) version control or unreachable remote
+  ? - Not under version control or unreachable remote
   b - Non-default branch checked out
   * - Uncommited changes in working dir
   + - Update available

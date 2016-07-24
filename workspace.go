@@ -102,7 +102,6 @@ func (w *workspace) uniqueWorker(wg *sync.WaitGroup) {
 				pkg = &Repo{
 					Path: bpkg.Dir,
 					Root: bpkg.ImportPath,
-					vcs:  nil,
 				}
 				w.repos[bpkg.ImportPath] = pkg
 			}
@@ -116,7 +115,23 @@ func (w *workspace) uniqueWorker(wg *sync.WaitGroup) {
 		}
 		vcs, err := vcsstate.NewVCS(vcsCmd)
 		if err != nil {
-			w.Errors <- fmt.Errorf("repo %v not supported by vcsstate: %v", root, err)
+			// Repository not supported by vcsstate.
+			var pkg *Repo
+			w.reposMu.Lock()
+			if _, ok := w.repos[root]; !ok {
+				pkg = &Repo{
+					Path:     bpkg.Dir,
+					Root:     root,
+					vcsError: fmt.Errorf("%v not supported by vcsstate: %v", vcsCmd.Name, err),
+				}
+				w.repos[root] = pkg
+			}
+			w.reposMu.Unlock()
+
+			// If new package, display an error and send off to next stage.
+			if pkg != nil {
+				w.unique <- pkg
+			}
 			continue
 		}
 

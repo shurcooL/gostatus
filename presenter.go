@@ -16,9 +16,12 @@ type RepoPresenter func(r *Repo) string
 
 // PorcelainPresenter is a simple porcelain repo presenter to humans.
 var PorcelainPresenter RepoPresenter = func(r *Repo) string {
+	if r.vcsError != nil {
+		return CompactPresenter(r) + "\n	? Unsupported version control: " + r.vcsError.Error()
+	}
 	if r.vcs == nil {
 		// Go package not under VCS.
-		return CompactPresenter(r) + "\n	? Not under (recognized) version control"
+		return CompactPresenter(r) + "\n	? Not under version control"
 	}
 
 	s := CompactPresenter(r)
@@ -50,6 +53,9 @@ var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 
 // CompactPresenter is a simple porcelain repo presenter to humans in compact form.
 var CompactPresenter RepoPresenter = func(r *Repo) string {
+	if r.vcsError != nil {
+		return "???? " + r.Root + "/..."
+	}
 	if r.vcs == nil {
 		// Go package not under VCS.
 		return "???? " + r.Root
