@@ -10,14 +10,14 @@ import (
 // EqualRepoURLs reports whether two URLs are equal, ignoring scheme and userinfo.
 // It parses URLs with support for SCP-like syntax, like the cmd/go tool.
 // If there are any errors parsing the URLs, it resorts to doing a string comparison.
-func EqualRepoURLs(rawurl1, rawurl2 string) bool {
-	u, err := parseURL(rawurl1)
+func EqualRepoURLs(rawurl0, rawurl1 string) bool {
+	u, err := parseURL(rawurl0)
 	if err != nil {
-		return rawurl1 == rawurl2
+		return rawurl0 == rawurl1
 	}
-	v, err := parseURL(rawurl2)
+	v, err := parseURL(rawurl1)
 	if err != nil {
-		return rawurl1 == rawurl2
+		return rawurl0 == rawurl1
 	}
 	u.Scheme, v.Scheme = "", "" // Ignore scheme.
 	u.User, v.User = nil, nil   // Ignore username and password information.
@@ -36,7 +36,7 @@ func parseURL(rawurl string) (*url.URL, error) {
 			Scheme: "ssh",
 			User:   url.User(m[1]),
 			Host:   m[2],
-			Path:   m[3],
+			Path:   "/" + m[3],
 		}, nil
 	}
 

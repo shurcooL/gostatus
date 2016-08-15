@@ -7,36 +7,36 @@ import (
 
 func TestEqualRepoURLs(t *testing.T) {
 	tests := []struct {
+		rawurl0 string
 		rawurl1 string
-		rawurl2 string
 		want    bool
 	}{
 		{
+			rawurl0: "https://github.com/user/repo",
 			rawurl1: "https://github.com/user/repo",
-			rawurl2: "https://github.com/user/repo",
 			want:    true,
 		},
 		{
 			// .git suffix does not have special treatment, and these are not considered as equal URLs.
 			// See https://github.com/shurcooL/gostatus/issues/37#issuecomment-225336823 for rationale.
-			rawurl1: "https://github.com/user/repo",
-			rawurl2: "https://github.com/user/repo.git",
+			rawurl0: "https://github.com/user/repo",
+			rawurl1: "https://github.com/user/repo.git",
 			want:    false,
 		},
 		{
-			rawurl1: "https://github.com/user/repo",
-			rawurl2: "https://github.com/user/wrongrepo",
+			rawurl0: "https://github.com/user/repo",
+			rawurl1: "https://github.com/user/wrongrepo",
 			want:    false,
 		},
 		{
-			rawurl1: "https://github.com/user/repo",
-			rawurl2: "git@github.com:user/repo",
+			rawurl0: "https://github.com/user/repo",
+			rawurl1: "git@github.com:user/repo",
 			want:    true,
 		},
 	}
 	for _, test := range tests {
-		if got, want := EqualRepoURLs(test.rawurl1, test.rawurl2), test.want; got != want {
-			t.Errorf("EqualRepoURLs(%q, %q): got %v, want %v", test.rawurl1, test.rawurl2, got, want)
+		if got, want := EqualRepoURLs(test.rawurl0, test.rawurl1), test.want; got != want {
+			t.Errorf("EqualRepoURLs(%q, %q): got %v, want %v", test.rawurl0, test.rawurl1, got, want)
 		}
 	}
 }
