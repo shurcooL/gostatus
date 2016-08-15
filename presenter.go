@@ -37,7 +37,9 @@ var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 	case r.Remote.Revision == "":
 		s += "\n	? Unreachable remote (check your connection)"
 	case !*fFlag && !status.EqualRepoURLs(r.Local.RemoteURL, r.Remote.RepoURL):
-		s += fmt.Sprintf("\n	# Remote URL (%s) doesn't match repo URL inferred from import path (%s)", r.Local.RemoteURL, r.Remote.RepoURL)
+		s += "\n	# Remote URL doesn't match repo URL inferred from import path:" +
+			fmt.Sprintf("\n		  (actual) %s", r.Local.RemoteURL) +
+			fmt.Sprintf("\n		(expected) %s", status.FormatRepoURL(r.Local.RemoteURL, r.Remote.RepoURL))
 	case r.Local.Revision != r.Remote.Revision:
 		if !r.LocalContainsRemoteRevision {
 			s += "\n	+ Update available"

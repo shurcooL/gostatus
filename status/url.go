@@ -3,19 +3,21 @@
 package status
 
 import (
+	"fmt"
 	"net/url"
 	"regexp"
+	"strings"
 )
 
 // EqualRepoURLs reports whether two URLs are equal, ignoring scheme and userinfo.
 // It parses URLs with support for SCP-like syntax, like the cmd/go tool.
 // If there are any errors parsing the URLs, it resorts to doing a string comparison.
 func EqualRepoURLs(rawurl0, rawurl1 string) bool {
-	u, err := parseURL(rawurl0)
+	u, _, err := parseURL(rawurl0)
 	if err != nil {
 		return rawurl0 == rawurl1
 	}
-	v, err := parseURL(rawurl1)
+	v, _, err := parseURL(rawurl1)
 	if err != nil {
 		return rawurl0 == rawurl1
 	}
@@ -24,11 +26,30 @@ func EqualRepoURLs(rawurl0, rawurl1 string) bool {
 	return u.String() == v.String()
 }
 
+// FormatRepoURL tries to rewrite rawurl to follow the same format as layout URL.
+// If either of two URLs has parsing errors, then rawurl is returned unmodified.
+func FormatRepoURL(layout, rawurl string) string {
+	u, _, err := parseURL(rawurl)
+	if err != nil {
+		return rawurl
+	}
+	l, scpSyntax, err := parseURL(layout)
+	if err != nil {
+		return rawurl
+	}
+	u.Scheme = l.Scheme // Take scheme from layout.
+	u.User = l.User     // Take username and password information from layout.
+	if scpSyntax {
+		return fmt.Sprintf("%s@%s:%s", u.User.Username(), u.Host, strings.TrimPrefix(u.Path, "/"))
+	}
+	return u.String()
+}
+
 // scpSyntaxRe matches the SCP-like addresses used by Git to access repositories by SSH.
 var scpSyntaxRe = regexp.MustCompile(`^([a-zA-Z0-9_]+)@([a-zA-Z0-9._-]+):(.*)$`)
 
 // parseURL is like url.Parse but with support for SCP-like syntax.
-func parseURL(rawurl string) (*url.URL, error) {
+func parseURL(rawurl string) (_ *url.URL, scpSyntax bool, _ error) {
 	// Match SCP-like syntax and convert it to a URL.
 	if m := scpSyntaxRe.FindStringSubmatch(rawurl); m != nil {
 		// E.g., "git@github.com:user/repo" becomes "ssh://git@github.com/user/repo".
@@ -37,8 +58,9 @@ func parseURL(rawurl string) (*url.URL, error) {
 			User:   url.User(m[1]),
 			Host:   m[2],
 			Path:   "/" + m[3],
-		}, nil
+		}, true, nil
 	}
 
-	return url.Parse(rawurl)
+	u, err := url.Parse(rawurl)
+	return u, false, err
 }
