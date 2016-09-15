@@ -84,7 +84,7 @@ func (w *workspace) uniqueWorker(wg *sync.WaitGroup) {
 	for importPath := range w.ImportPaths {
 		// Determine repo root.
 		// This is potentially somewhat slow.
-		bpkg, err := build.Import(importPath, wd, build.FindOnly)
+		bpkg, err := build.Import(importPath, wd, build.FindOnly|build.IgnoreVendor)
 		if err != nil {
 			w.Errors <- err
 			continue
@@ -195,7 +195,7 @@ func (*workspace) computeVCSState(r *Repo) {
 		if b, err := r.vcs.CachedRemoteDefaultBranch(); err == nil {
 			r.Remote.Branch = b
 		} else {
-			log.Println(remoteErr)
+			log.Printf("%v: %v\n", r.Root, remoteErr)
 			r.Remote.Branch = r.vcs.NoRemoteDefaultBranch() // It's a better fallback than empty string.
 		}
 	}
