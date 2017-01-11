@@ -45,13 +45,13 @@ func FormatRepoURL(layout, rawurl string) string {
 	return u.String()
 }
 
-// scpSyntaxRe matches the SCP-like addresses used by Git to access repositories by SSH.
-var scpSyntaxRe = regexp.MustCompile(`^([a-zA-Z0-9_]+)@([a-zA-Z0-9._-]+):(.*)$`)
+// scpSyntaxRE matches the SCP-like addresses used by Git to access repositories by SSH.
+var scpSyntaxRE = regexp.MustCompile(`^([a-zA-Z0-9_]+)@([a-zA-Z0-9._-]+):(.*)$`)
 
 // parseURL is like url.Parse but with support for SCP-like syntax.
 func parseURL(rawurl string) (_ *url.URL, scpSyntax bool, _ error) {
 	// Match SCP-like syntax and convert it to a URL.
-	if m := scpSyntaxRe.FindStringSubmatch(rawurl); m != nil {
+	if m := scpSyntaxRE.FindStringSubmatch(rawurl); m != nil {
 		// E.g., "git@github.com:user/repo" becomes "ssh://git@github.com/user/repo".
 		return &url.URL{
 			Scheme: "ssh",
