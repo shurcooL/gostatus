@@ -42,7 +42,7 @@ var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 		if !r.LocalContainsRemoteRevision {
 			s += "\n	+ Update available"
 		} else {
-			s += "\n	- Local revision is ahead of remote"
+			s += "\n	- Local revision is ahead of remote revision"
 		}
 	}
 	if r.Local.Stash != "" {
