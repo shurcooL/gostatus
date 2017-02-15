@@ -1,4 +1,7 @@
-# gostatus [![Build Status](https://travis-ci.org/shurcooL/gostatus.svg?branch=master)](https://travis-ci.org/shurcooL/gostatus) [![GoDoc](https://godoc.org/github.com/shurcooL/gostatus?status.svg)](https://godoc.org/github.com/shurcooL/gostatus)
+gostatus
+========
+
+[![Build Status](https://travis-ci.org/shurcooL/gostatus.svg?branch=master)](https://travis-ci.org/shurcooL/gostatus) [![GoDoc](https://godoc.org/github.com/shurcooL/gostatus?status.svg)](https://godoc.org/github.com/shurcooL/gostatus)
 
 gostatus is a command line tool that shows the status of Go repositories.
 
@@ -69,17 +72,17 @@ Sample Output
 
 ```bash
 $ gostatus all
-github.com/dchest/uniuri/...
+  +  github.com/dchest/uniuri/...
 	+ Update available
-github.com/syndtr/goleveldb/...
+  +  github.com/syndtr/goleveldb/...
 	+ Update available
-github.com/shurcooL/go-goon/...
+b    github.com/shurcooL/go-goon/...
 	b Non-default branch checked out
-github.com/shurcooL/Conception-go/...
+ *   github.com/shurcooL/Conception-go/...
 	* Uncommited changes in working dir
-github.com/russross/blackfriday/...
+  #  github.com/russross/blackfriday/...
 	# Remote path doesn't match import path
-github.com/microcosm-cc/bluemonday/...
+   $ github.com/microcosm-cc/bluemonday/...
 	$ Stash exists
 ```
 
@@ -91,6 +94,13 @@ There are a few observations that can be made from that sample output.
 -	`blackfriday` repo has a ***remote that doesn't match its import path***. It's likely my fork in place of the original repo for temporary development purposes.
 -	`bluemonday` repo has a ***stash***. Perhaps I have some unfinished and uncommited work that I should take care of.
 -	All other repos are ***up to date*** and looking good (they're not displayed unless `-v` is used).
+
+Directories
+-----------
+
+| Path                                                            | Synopsis                                                                                          |
+|-----------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| [status](https://godoc.org/github.com/shurcooL/gostatus/status) | Package status provides a func to check if two repo URLs are equal in the context of Go packages. |
 
 License
 -------
