@@ -99,6 +99,7 @@ There are a few observations that can be made from that sample output.
 -	`Conception-go` repo has ***uncommited changes***. I should remember to commit or discard the changes.
 -	`blackfriday` repo has a ***remote that doesn't match its import path***. It's likely my fork in place of the original repo for temporary development purposes.
 -	`bluemonday` repo has a ***stash***. Perhaps I have some unfinished and uncommited work that I should take care of.
+-	`go-pkg-xmlx` repo was ***not found***. Perhaps the repository was deleted or made private.
 -	All other repos are ***up to date*** and looking good (they're not displayed unless `-v` is used).
 
 Directories
