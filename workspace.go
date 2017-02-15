@@ -186,16 +186,19 @@ func (*workspace) computeVCSState(r *Repo) {
 	if remote, err := r.vcs.RemoteURL(r.Path); err == nil {
 		r.Local.RemoteURL = remote
 	}
-	if b, rev, remoteErr := r.vcs.RemoteBranchAndRevision(r.Path); remoteErr == nil {
+	if b, rev, remoteError := r.vcs.RemoteBranchAndRevision(r.Path); remoteError == nil {
 		r.Remote.Branch = b
 		r.Remote.Revision = rev
-	} else if remoteErr == vcsstate.ErrNoRemote {
+	} else if remoteError == vcsstate.ErrNoRemote {
 		r.Remote.Branch = r.vcs.NoRemoteDefaultBranch()
-	} else if remoteErr != nil {
+	} else if notFoundError, ok := remoteError.(vcsstate.NotFoundError); ok {
+		r.Remote.NotFound = notFoundError
+		r.Remote.Branch = r.vcs.NoRemoteDefaultBranch()
+	} else if remoteError != nil {
 		if b, err := r.vcs.CachedRemoteDefaultBranch(); err == nil {
 			r.Remote.Branch = b
 		} else {
-			log.Printf("%v: %v\n", r.Root, remoteErr)
+			log.Printf("%v: %v\n", r.Root, remoteError)
 			r.Remote.Branch = r.vcs.NoRemoteDefaultBranch() // It's a better fallback than empty string.
 		}
 	}

@@ -43,6 +43,7 @@ Legend:
   + - Update available
   - - Local revision is ahead of remote
   ! - No remote
+  / - Remote repository not found (was it deleted? made private?)
   # - Remote path doesn't match import path
   $ - Stash exists
 ```
@@ -84,6 +85,11 @@ b    github.com/shurcooL/go-goon/...
 	# Remote path doesn't match import path
    $ github.com/microcosm-cc/bluemonday/...
 	$ Stash exists
+  /  github.com/go-forks/go-pkg-xmlx/...
+	/ Remote repository not found (was it deleted? made private?):
+		remote repository not found:
+		exit status 128: remote: Repository not found.
+		fatal: repository 'https://github.com/go-forks/go-pkg-xmlx/' not found
 ```
 
 There are a few observations that can be made from that sample output.

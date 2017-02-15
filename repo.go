@@ -28,6 +28,7 @@ type Repo struct {
 		// RepoURL is the repository URL, including scheme, as determined dynamically from the import path.
 		RepoURL string
 
+		NotFound error  // Whether remote repository was not found.
 		Branch   string // Default branch, as determined from remote.
 		Revision string
 	}

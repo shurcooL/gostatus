@@ -53,6 +53,7 @@ Legend:
   + - Update available
   - - Local revision is ahead of remote
   ! - No remote
+  / - Remote repository not found (was it deleted? made private?)
   # - Remote path doesn't match import path
   $ - Stash exists
 `)

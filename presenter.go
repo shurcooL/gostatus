@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 
+	"github.com/shurcooL/go/indentwriter"
 	"github.com/shurcooL/gostatus/status"
 )
 
@@ -34,6 +37,9 @@ var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 	switch {
 	case r.Local.RemoteURL == "":
 		s += "\n	! No remote"
+	case r.Remote.NotFound != nil:
+		s += "\n	/ Remote repository not found (was it deleted? made private?):" +
+			"\n" + indent(r.Remote.NotFound.Error())
 	case r.Remote.Revision == "":
 		s += "\n	? Unreachable remote (check your connection)"
 	case !*fFlag && !status.EqualRepoURLs(r.Local.RemoteURL, r.Remote.RepoURL):
@@ -51,6 +57,17 @@ var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 		s += "\n	$ Stash exists"
 	}
 	return s
+}
+
+// indent indents s by 2 tabs.
+func indent(s string) string {
+	var buf bytes.Buffer
+	w := indentwriter.New(&buf, 2)
+	_, err := io.WriteString(w, s)
+	if err != nil {
+		panic(fmt.Errorf("indent writes to bytes.Buffer, and should never fail, yet it did: %v", err))
+	}
+	return buf.String()
 }
 
 // CompactPresenter is a simple porcelain repo presenter to humans in compact form.
@@ -79,6 +96,8 @@ var CompactPresenter RepoPresenter = func(r *Repo) string {
 	switch {
 	case r.Local.RemoteURL == "":
 		s += "!"
+	case r.Remote.NotFound != nil:
+		s += "/"
 	case r.Remote.Revision == "":
 		s += "?"
 	case !*fFlag && !status.EqualRepoURLs(r.Local.RemoteURL, r.Remote.RepoURL):
