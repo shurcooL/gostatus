@@ -25,7 +25,7 @@ func EqualRepoURLs(rawurl0, rawurl1 string) bool {
 	u.User, v.User = nil, nil   // Ignore username and password information.
 	// Ignore the .git extension, which GitHub ignores for the git User-Agent.
 	u.Path, v.Path = strings.TrimSuffix(u.Path, ".git"), strings.TrimSuffix(v.Path, ".git")
-	return u.String() == v.String()
+	return strings.ToLower(u.String()) == strings.ToLower(v.String())
 }
 
 // FormatRepoURL tries to rewrite rawurl to follow the same format as layout URL.
