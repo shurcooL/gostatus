@@ -23,6 +23,8 @@ func EqualRepoURLs(rawurl0, rawurl1 string) bool {
 	}
 	u.Scheme, v.Scheme = "", "" // Ignore scheme.
 	u.User, v.User = nil, nil   // Ignore username and password information.
+	// Ignore the .git extension, which GitHub ignores for the git User-Agent.
+	u.Path, v.Path = strings.TrimSuffix(u.Path, ".git"), strings.TrimSuffix(v.Path, ".git")
 	return u.String() == v.String()
 }
 
