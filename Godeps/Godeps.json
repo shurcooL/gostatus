@@ -1,0 +1,50 @@
+{
+	"ImportPath": "github.com/shurcooL/gostatus",
+	"GoVersion": "go1.3.1",
+	"Deps": [
+		{
+			"ImportPath": "github.com/shurcooL/go/exp/12",
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/go/exp/13",
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/go/gists/gist5258650",
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/go/gists/gist5286084",
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/go/gists/gist5504644",
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/go/gists/gist5892738",
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/go/gists/gist7480523",
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/go/gists/gist7519227",
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/go/gists/gist7651991",
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/go/gists/gist7802150",
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
+		},
+		{
+			"ImportPath": "github.com/shurcooL/go/vcs",
+			"Rev": "59cb32de0183224dca57a61c2980cebee80a5b48"
+		}
+	]
+}
