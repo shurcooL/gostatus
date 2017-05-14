@@ -22,15 +22,6 @@ var (
 	compactFlag = flag.Bool("c", false, "Compact output with inline notation.")
 )
 
-var wd = func() string {
-	// Get current directory.
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Fatalln("failed to get current directory:", err)
-	}
-	return wd
-}()
-
 func usage() {
 	fmt.Fprint(os.Stderr, "Usage: gostatus [flags] [packages]\n")
 	fmt.Fprint(os.Stderr, "       [newline separated packages] | gostatus -stdin [flags]\n")
@@ -125,3 +116,12 @@ func main() {
 		}
 	}
 }
+
+var wd = func() string {
+	// Get current directory.
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln("failed to get current directory:", err)
+	}
+	return wd
+}()
