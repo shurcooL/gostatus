@@ -42,7 +42,8 @@ Legend:
   b - Non-default branch checked out
   * - Uncommited changes in working dir
   + - Update available
-  - - Local revision is ahead of remote
+  - - Local revision is ahead of remote revision
+  ± - Update available; local revision is ahead of remote revision
   ! - No remote
   / - Remote repository not found (was it deleted? made private?)
   # - Remote path doesn't match import path

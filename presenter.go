@@ -47,10 +47,15 @@ var PorcelainPresenter RepoPresenter = func(r *Repo) string {
 			fmt.Sprintf("\n		  (actual) %s", r.Local.RemoteURL) +
 			fmt.Sprintf("\n		(expected) %s", status.FormatRepoURL(r.Local.RemoteURL, r.Remote.RepoURL))
 	case r.Local.Revision != r.Remote.Revision:
-		if !r.LocalContainsRemoteRevision {
+		switch {
+		case !r.Local.ContainsRemoteRevision && r.Remote.ContainsLocalRevision:
 			s += "\n	+ Update available"
-		} else {
+		case r.Local.ContainsRemoteRevision && !r.Remote.ContainsLocalRevision:
 			s += "\n	- Local revision is ahead of remote revision"
+		case !r.Local.ContainsRemoteRevision && !r.Remote.ContainsLocalRevision:
+			s += "\n	± Update available; local revision is ahead of remote revision"
+		default:
+			panic(fmt.Errorf("internal error: both r.Local.ContainsRemoteRevision and r.Remote.ContainsLocalRevision are true, yet r.Local.Revision != r.Remote.Revision; this shouldn't be possible, please report if it happens"))
 		}
 	}
 	if r.Local.Stash != "" {
@@ -103,10 +108,15 @@ var CompactPresenter RepoPresenter = func(r *Repo) string {
 	case !*fFlag && !status.EqualRepoURLs(r.Local.RemoteURL, r.Remote.RepoURL):
 		s += "#"
 	case r.Local.Revision != r.Remote.Revision:
-		if !r.LocalContainsRemoteRevision {
+		switch {
+		case !r.Local.ContainsRemoteRevision && r.Remote.ContainsLocalRevision:
 			s += "+"
-		} else {
+		case r.Local.ContainsRemoteRevision && !r.Remote.ContainsLocalRevision:
 			s += "-"
+		case !r.Local.ContainsRemoteRevision && !r.Remote.ContainsLocalRevision:
+			s += "±"
+		default:
+			panic(fmt.Errorf("internal error: both r.Local.ContainsRemoteRevision and r.Remote.ContainsLocalRevision are true, yet r.Local.Revision != r.Remote.Revision; this shouldn't be possible, please report if it happens"))
 		}
 	default:
 		s += " "

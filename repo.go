@@ -23,6 +23,8 @@ type Repo struct {
 		Branch   string // Checked out branch.
 		Revision string
 		Stash    string
+
+		ContainsRemoteRevision bool // Computed if Remote.Revision != "".
 	}
 	Remote struct {
 		// RepoURL is the repository URL, including scheme, as determined dynamically from the import path.
@@ -31,6 +33,7 @@ type Repo struct {
 		NotFound error  // Whether remote repository was not found.
 		Branch   string // Default branch, as determined from remote.
 		Revision string
+
+		ContainsLocalRevision bool // Computed if Local.Revision != "".
 	}
-	LocalContainsRemoteRevision bool
 }

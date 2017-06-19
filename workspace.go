@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/build"
 	"log"
+	"strings"
 	"sync"
 
 	"github.com/bradfitz/iter"
@@ -207,7 +208,16 @@ func (*workspace) computeVCSState(r *Repo) {
 	}
 	if r.Remote.Revision != "" {
 		if c, err := r.vcs.Contains(r.Path, r.Remote.Revision, r.Remote.Branch); err == nil {
-			r.LocalContainsRemoteRevision = c
+			r.Local.ContainsRemoteRevision = c
+		}
+	}
+	if r.Local.Revision != "" {
+		if c, err := r.vcs.RemoteContains(r.Path, r.Local.Revision); err == nil {
+			r.Remote.ContainsLocalRevision = c
+		} else if strings.Contains(err.Error(), "not implemented") && r.Local.Revision != r.Remote.Revision && r.Remote.Revision != "" {
+			// Fall back to using r.Local.ContainsRemoteRevision to deduct information.
+			// Assume that if local contains remote revision, then remote doesn't, and vice versa.
+			r.Remote.ContainsLocalRevision = !r.Local.ContainsRemoteRevision
 		}
 	}
 	if rr, err := vcs.RepoRootForImportPath(r.Root, false); err == nil {
