@@ -212,7 +212,7 @@ func (*workspace) computeVCSState(r *Repo) {
 		}
 	}
 	if r.Local.Revision != "" {
-		if c, err := r.vcs.RemoteContains(r.Path, r.Local.Revision); err == nil {
+		if c, err := r.vcs.RemoteContains(r.Path, r.Local.Revision, r.Remote.Branch); err == nil {
 			r.Remote.ContainsLocalRevision = c
 		} else if strings.Contains(err.Error(), "not implemented") && r.Local.Revision != r.Remote.Revision && r.Remote.Revision != "" {
 			// Fall back to using r.Local.ContainsRemoteRevision to deduct information.
