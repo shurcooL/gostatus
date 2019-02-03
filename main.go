@@ -35,7 +35,7 @@ Examples:
   gostatus
 
   # Show status of all dependencies (recursive) of package in current dir.
-  go list -f '{{join .Deps "\n"}}' . | gostatus -stdin -v
+  go list -deps | gostatus -stdin -v
 
 Legend:
   ? - Not under version control or unreachable remote
