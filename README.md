@@ -1,21 +1,21 @@
 gostatus
 ========
 
-[![Build Status](https://travis-ci.org/shurcooL/gostatus.svg?branch=master)](https://travis-ci.org/shurcooL/gostatus) [![GoDoc](https://godoc.org/github.com/shurcooL/gostatus?status.svg)](https://godoc.org/github.com/shurcooL/gostatus)
+[![Go Reference](https://pkg.go.dev/badge/github.com/shurcooL/gostatus.svg)](https://pkg.go.dev/github.com/shurcooL/gostatus)
 
 gostatus is a command line tool that shows the status of Go repositories.
 
 Installation
 ------------
 
-```bash
-go get -u github.com/shurcooL/gostatus
+```sh
+go install github.com/shurcooL/gostatus@latest
 ```
 
 Usage
 -----
 
-```bash
+```sh
 Usage: gostatus [flags] [packages]
        [newline separated packages] | gostatus -stdin [flags]
   -c	Compact output with inline notation.
@@ -52,7 +52,7 @@ Legend:
 Examples
 --------
 
-```bash
+```sh
 # Show status of all packages.
 $ gostatus all
 
@@ -72,7 +72,7 @@ $ go list -deps import/path | gostatus -stdin -v
 Sample Output
 -------------
 
-```bash
+```sh
 $ gostatus all
   +  github.com/dchest/uniuri/...
 	+ Update available
@@ -106,9 +106,9 @@ There are a few observations that can be made from that sample output.
 Directories
 -----------
 
-| Path                                                            | Synopsis                                                                                          |
-|-----------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
-| [status](https://godoc.org/github.com/shurcooL/gostatus/status) | Package status provides a func to check if two repo URLs are equal in the context of Go packages. |
+| Path                                                             | Synopsis                                                                                          |
+|------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| [status](https://pkg.go.dev/github.com/shurcooL/gostatus/status) | Package status provides a func to check if two repo URLs are equal in the context of Go packages. |
 
 License
 -------
